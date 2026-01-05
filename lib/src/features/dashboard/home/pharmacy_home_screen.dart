@@ -351,7 +351,7 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
       child: ListView.separated(
         scrollDirection: Axis.horizontal, // Horizontal scrolling
         itemCount: categories.length,
-        separatorBuilder: (_, _) =>
+        separatorBuilder: (_, __) =>
             const SizedBox(width: 20), // Spacing between items
         itemBuilder: (context, index) {
           final cat = categories[index];

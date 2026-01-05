@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:med_shakthi/src/features/payment/payment.dart';
 
 // --- DATA MODEL ---
 class CartItem {
@@ -67,8 +68,8 @@ class _CartPageState extends State<CartPage> {
   ];
 
   // Calculations
-  double get subTotal => _cartItems.fold(
-      0, (total, item) => total + (item.price * item.quantity));
+  double get subTotal =>
+      _cartItems.fold(0, (total, item) => total + (item.price * item.quantity));
 
 // Hardcoded shipping
   int get shipping => 10; // Now an integer
@@ -105,7 +106,8 @@ class _CartPageState extends State<CartPage> {
           children: [
             // --- HEADER ---
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
               child: Row(
                 children: [
                   _buildIconButton(Icons.arrow_back, onTap: () {
@@ -131,7 +133,8 @@ class _CartPageState extends State<CartPage> {
               child: ListView.separated(
                 padding: const EdgeInsets.all(20),
                 itemCount: _cartItems.length,
-                separatorBuilder: (context, index) => const SizedBox(height: 20),
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 20),
                 itemBuilder: (context, index) {
                   return _buildCartItemCard(_cartItems[index], index);
                 },
@@ -183,7 +186,10 @@ class _CartPageState extends State<CartPage> {
                         ),
                         elevation: 0,
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        if (_cartItems.isEmpty) return;
+                        _showCheckoutConfirmDialog();
+                      },
                       child: const Text(
                         "Checkout",
                         style: TextStyle(
@@ -238,7 +244,7 @@ class _CartPageState extends State<CartPage> {
           ),
         ),
         Text(
-         "\$${value is int ? value.toString() : value.toStringAsFixed(2)}",
+          "\$${value is int ? value.toString() : value.toStringAsFixed(2)}",
           style: const TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w600,
@@ -355,7 +361,7 @@ class _CartPageState extends State<CartPage> {
                             Icons.add, () => _incrementQuantity(index)),
                       ],
                     ),
-                    
+
                     // Trash Icon
                     GestureDetector(
                       onTap: () => _removeItem(index),
@@ -389,6 +395,99 @@ class _CartPageState extends State<CartPage> {
           border: Border.all(color: Colors.grey.shade300),
         ),
         child: Icon(icon, size: 16, color: Colors.grey[600]),
+      ),
+    );
+  }
+
+  void _showCheckoutConfirmDialog() {
+    final int totalItems =
+        _cartItems.fold(0, (sum, item) => sum + item.quantity);
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            'Confirm Checkout',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'You are placing an order for $totalItems item(s).',
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 12),
+              _dialogPriceRow('Subtotal', subTotal),
+              _dialogPriceRow('Shipping & Tax', shipping),
+              const Divider(height: 24),
+              _dialogPriceRow(
+                'Total Payable',
+                total,
+                isBold: true,
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Please confirm to proceed with payment.',
+                style: TextStyle(fontSize: 13, color: Colors.grey),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: themeColor,
+                foregroundColor: Colors.white,
+                elevation: 0,
+              ),
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => PaymentMethodScreen()));
+                // _handleCheckout();
+              },
+              child: const Text('Confirm Order'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _dialogPriceRow(
+    String label,
+    num value, {
+    bool isBold = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontWeight: isBold ? FontWeight.w600 : FontWeight.normal,
+            ),
+          ),
+          Text(
+            '\$${value is int ? value : value.toStringAsFixed(2)}',
+            style: TextStyle(
+              fontWeight: isBold ? FontWeight.w700 : FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }
