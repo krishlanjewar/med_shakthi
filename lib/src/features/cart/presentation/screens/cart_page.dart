@@ -21,6 +21,9 @@ class CartPage extends StatelessWidget {
     // Listen to changes in CartData using Provider.of
     final cart = Provider.of<CartData>(context);
 
+    // Shipping logic: 199 if items exist, 0 otherwise
+    final int shipping = cart.items.isNotEmpty ? 10 : 0;
+
     // Calculate total for display
     final double total = cart.subTotal + shipping;
 
@@ -31,24 +34,34 @@ class CartPage extends StatelessWidget {
           children: [
             // --- HEADER ---
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 10,
+              ),
               child: Row(
                 children: [
-                  _buildIconButton(context, Icons.arrow_back, onTap: () {
-                    if (Navigator.canPop(context)) {
-                      Navigator.pop(context);
-                    }
-                  }),
+                  _buildIconButton(
+                    context,
+                    Icons.arrow_back,
+                    onTap: () {
+                      if (Navigator.canPop(context)) {
+                        Navigator.pop(context);
+                      }
+                    },
+                  ),
                   const SizedBox(width: 16),
                   const Text(
                     "Cart",
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   const Spacer(),
-                  // You can wire these up to Provider logic if needed
-                  _buildIconButton(context, Icons.delete_outline, onTap: () {
-                    // Example: cart.clearCart();
-                  }),
+                  _buildIconButton(
+                    context,
+                    Icons.delete_outline,
+                    onTap: () {
+                      cart.clearCart();
+                    },
+                  ),
                   const SizedBox(width: 8),
                   _buildIconButton(context, Icons.share_outlined, onTap: () {}),
                 ],
@@ -59,89 +72,100 @@ class CartPage extends StatelessWidget {
             Expanded(
               child: cart.items.isEmpty
                   ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.shopping_cart_outlined,
-                        size: 64, color: Colors.grey[400]),
-                    const SizedBox(height: 16),
-                    Text('Your cart is empty',
-                        style: TextStyle(color: Colors.grey[600])),
-                  ],
-                ),
-              )
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.shopping_cart_outlined,
+                            size: 64,
+                            color: Colors.grey[400],
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Your cart is empty',
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
+                        ],
+                      ),
+                    )
                   : ListView.separated(
-                padding: const EdgeInsets.all(20),
-                itemCount: cart.items.length,
-                separatorBuilder: (context, index) =>
-                const SizedBox(height: 20),
-                itemBuilder: (context, index) {
-                  return _buildCartItemCard(
-                      context, cart, cart.items[index], index);
-                },
-              ),
+                      padding: const EdgeInsets.all(20),
+                      itemCount: cart.items.length,
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 20),
+                      itemBuilder: (context, index) {
+                        return _buildCartItemCard(
+                          context,
+                          cart,
+                          cart.items[index],
+                          index,
+                        );
+                      },
+                    ),
             ),
 
             // --- BOTTOM SUMMARY SECTION ---
-            Container(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildSummaryRow("Sub Total", cart.subTotal),
-                  const SizedBox(height: 12),
-                  _buildSummaryRow("Shipping & Tax", shipping),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Total",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+            // Only show if cart is NOT empty
+            if (cart.items.isNotEmpty)
+              Container(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildSummaryRow("Sub Total", cart.subTotal),
+                    const SizedBox(height: 12),
+                    _buildSummaryRow("Shipping & Tax", shipping),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Total",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      Text(
-                        "\$${total.toStringAsFixed(2)}",
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
+                        Text(
+                          "₹${total.toStringAsFixed(2)}",
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
 
-                  // Checkout Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 55,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: themeColor,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
+                    // Checkout Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 55,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: themeColor,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          elevation: 0,
                         ),
-                        elevation: 0,
-                      ),
-                      onPressed: () {
-                        if (cart.items.isEmpty) return;
-                        _showCheckoutConfirmDialog(context, cart);
-                      },
-                      child: const Text(
-                        "Checkout",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                        onPressed: () {
+                          if (cart.items.isEmpty) return;
+                          _showCheckoutConfirmDialog(context, cart, shipping);
+                        },
+                        child: const Text(
+                          "Checkout",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            )
           ],
         ),
       ),
@@ -150,8 +174,11 @@ class CartPage extends StatelessWidget {
 
   // --- HELPER WIDGETS ---
 
-  Widget _buildIconButton(BuildContext context, IconData icon,
-      {VoidCallback? onTap}) {
+  Widget _buildIconButton(
+    BuildContext context,
+    IconData icon, {
+    VoidCallback? onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -165,7 +192,7 @@ class CartPage extends StatelessWidget {
               color: Colors.grey.withOpacity(0.1),
               spreadRadius: 1,
               blurRadius: 3,
-            )
+            ),
           ],
         ),
         child: Icon(icon, color: Colors.black87, size: 20),
@@ -177,15 +204,9 @@ class CartPage extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
+        Text(label, style: TextStyle(fontSize: 15, color: Colors.grey[600])),
         Text(
-          label,
-          style: TextStyle(
-            fontSize: 15,
-            color: Colors.grey[600],
-          ),
-        ),
-        Text(
-          "\$${value is int ? value.toString() : value.toStringAsFixed(2)}",
+          "₹${value is int ? value.toString() : value.toStringAsFixed(2)}",
           style: const TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w600,
@@ -197,8 +218,11 @@ class CartPage extends StatelessWidget {
   }
 
   Widget _buildCartItemCard(
-      BuildContext context, CartData cart, CartItem item, int index) {
-
+    BuildContext context,
+    CartData cart,
+    CartItem item,
+    int index,
+  ) {
     // Check if the image path is a URL (http/https) or a local asset
     final bool isNetworkImage = item.imagePath?.startsWith('http') ?? false;
 
@@ -227,17 +251,23 @@ class CartPage extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
               child: isNetworkImage
                   ? Image.network(
-                item.imagePath!,
-                fit: BoxFit.contain,
-                errorBuilder: (c, o, s) => const Icon(Icons.medication,
-                    size: 40, color: Colors.grey),
-              )
+                      item.imagePath!,
+                      fit: BoxFit.contain,
+                      errorBuilder: (c, o, s) => const Icon(
+                        Icons.medication,
+                        size: 40,
+                        color: Colors.grey,
+                      ),
+                    )
                   : Image.asset(
-                item.imagePath ?? '',
-                fit: BoxFit.contain,
-                errorBuilder: (c, o, s) => const Icon(Icons.medication,
-                    size: 40, color: Colors.grey),
-              ),
+                      item.imagePath ?? '',
+                      fit: BoxFit.contain,
+                      errorBuilder: (c, o, s) => const Icon(
+                        Icons.medication,
+                        size: 40,
+                        color: Colors.grey,
+                      ),
+                    ),
             ),
           ),
 
@@ -277,13 +307,10 @@ class CartPage extends StatelessWidget {
                     // Use fallback if size is null
                     Text(
                       item.size ?? '',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[500],
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.grey[500]),
                     ),
                     Text(
-                      "\$${item.price.toStringAsFixed(2)}",
+                      "₹${item.price.toStringAsFixed(2)}",
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -302,19 +329,25 @@ class CartPage extends StatelessWidget {
                     Row(
                       children: [
                         _buildQuantityBtn(
-                            Icons.remove, () => cart.decrement(index)),
+                          Icons.remove,
+                          () => cart.decrement(index),
+                        ),
                         SizedBox(
                           width: 30,
                           child: Center(
                             child: Text(
                               '${item.quantity}',
                               style: const TextStyle(
-                                  fontWeight: FontWeight.w600, fontSize: 16),
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                              ),
                             ),
                           ),
                         ),
                         _buildQuantityBtn(
-                            Icons.add, () => cart.increment(index)),
+                          Icons.add,
+                          () => cart.increment(index),
+                        ),
                       ],
                     ),
 
@@ -327,15 +360,18 @@ class CartPage extends StatelessWidget {
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.grey.shade200),
                         ),
-                        child: Icon(Icons.delete_outline,
-                            size: 18, color: Colors.grey[400]),
+                        child: Icon(
+                          Icons.delete_outline,
+                          size: 18,
+                          color: Colors.grey[400],
+                        ),
                       ),
-                    )
+                    ),
                   ],
-                )
+                ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
@@ -355,10 +391,17 @@ class CartPage extends StatelessWidget {
     );
   }
 
-  void _showCheckoutConfirmDialog(BuildContext context, CartData cart) {
+  void _showCheckoutConfirmDialog(
+    BuildContext context,
+    CartData cart,
+    int shipping,
+  ) {
+    // Added shipping arg
     // Explicitly casting quantity to int to avoid type errors
-    final int totalItems =
-    cart.items.fold(0, (sum, item) => sum + item.quantity.toInt());
+    final int totalItems = cart.items.fold(
+      0,
+      (sum, item) => sum + item.quantity.toInt(),
+    );
 
     // Calculate final total based on live data
     final double total = cart.subTotal + shipping;
@@ -387,11 +430,7 @@ class CartPage extends StatelessWidget {
               _dialogPriceRow('Subtotal', cart.subTotal),
               _dialogPriceRow('Shipping & Tax', shipping),
               const Divider(height: 24),
-              _dialogPriceRow(
-                'Total Payable',
-                total,
-                isBold: true,
-              ),
+              _dialogPriceRow('Total Payable', total, isBold: true),
               const SizedBox(height: 12),
               const Text(
                 'Please confirm to proceed with payment.',
@@ -413,9 +452,11 @@ class CartPage extends StatelessWidget {
               onPressed: () {
                 Navigator.pop(context); // Close dialog
                 Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const AddressSelectScreen()));
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AddressSelectScreen(),
+                  ),
+                );
               },
               child: const Text('Confirm Order'),
             ),
@@ -425,11 +466,7 @@ class CartPage extends StatelessWidget {
     );
   }
 
-  Widget _dialogPriceRow(
-      String label,
-      num value, {
-        bool isBold = false,
-      }) {
+  Widget _dialogPriceRow(String label, num value, {bool isBold = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -442,7 +479,7 @@ class CartPage extends StatelessWidget {
             ),
           ),
           Text(
-            '\$${value is int ? value : value.toStringAsFixed(2)}',
+            '₹${value is int ? value : value.toStringAsFixed(2)}',
             style: TextStyle(
               fontWeight: isBold ? FontWeight.w700 : FontWeight.w500,
             ),

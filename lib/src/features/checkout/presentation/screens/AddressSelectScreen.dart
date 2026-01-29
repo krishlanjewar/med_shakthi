@@ -40,8 +40,10 @@ class _AddressSelectScreenState extends State<AddressSelectScreen> {
 
   Future<void> _getAddress(LatLng pos) async {
     try {
-      final placemarks =
-      await placemarkFromCoordinates(pos.latitude, pos.longitude);
+      final placemarks = await placemarkFromCoordinates(
+        pos.latitude,
+        pos.longitude,
+      );
 
       if (placemarks.isEmpty) return;
 
@@ -49,7 +51,7 @@ class _AddressSelectScreenState extends State<AddressSelectScreen> {
 
       setState(() {
         addressText =
-        "${p.street ?? ''}, ${p.locality ?? ''}, ${p.administrativeArea ?? ''}, ${p.postalCode ?? ''}";
+            "${p.street ?? ''}, ${p.locality ?? ''}, ${p.administrativeArea ?? ''}, ${p.postalCode ?? ''}";
       });
     } catch (e) {
       setState(() {
@@ -73,13 +75,28 @@ class _AddressSelectScreenState extends State<AddressSelectScreen> {
         mapController?.animateCamera(CameraUpdate.newLatLngZoom(latLng, 15));
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Address not found")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Address not found")));
     }
   }
 
-  void _showAddAddressBottomSheet() {
+  void _showAddAddressBottomSheet({AddressModel? addressToEdit}) {
+    if (addressToEdit != null) {
+      _searchController.text = addressToEdit.fullAddress;
+      selectedLatLng = LatLng(addressToEdit.lat, addressToEdit.lng);
+      addressText = addressToEdit.fullAddress;
+      // Animate map to existing location
+      Future.delayed(const Duration(milliseconds: 500), () {
+        mapController?.animateCamera(
+          CameraUpdate.newLatLngZoom(selectedLatLng, 15),
+        );
+      });
+    } else {
+      _searchController.clear();
+      // Default location or current location logic
+    }
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -114,14 +131,21 @@ class _AddressSelectScreenState extends State<AddressSelectScreen> {
                       target: selectedLatLng,
                       zoom: 15,
                     ),
-                    onMapCreated: (controller) => mapController = controller,
+                    onMapCreated: (controller) {
+                      mapController = controller;
+                      if (addressToEdit != null) {
+                        controller.animateCamera(
+                          CameraUpdate.newLatLngZoom(selectedLatLng, 15),
+                        );
+                      }
+                    },
                     onTap: (pos) async {
                       setState(() => selectedLatLng = pos);
                       await _getAddress(pos);
                     },
                     gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                       Factory<OneSequenceGestureRecognizer>(
-                            () => EagerGestureRecognizer(),
+                        () => EagerGestureRecognizer(),
                       ),
                     },
                     markers: {
@@ -148,10 +172,13 @@ class _AddressSelectScreenState extends State<AddressSelectScreen> {
                           minimumSize: const Size.fromHeight(52),
                         ),
                         onPressed: () async {
-                          final user = Supabase.instance.client.auth.currentUser;
+                          final user =
+                              Supabase.instance.client.auth.currentUser;
                           if (user == null) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text("User not logged in")),
+                              const SnackBar(
+                                content: Text("User not logged in"),
+                              ),
                             );
                             return;
                           }
@@ -159,29 +186,48 @@ class _AddressSelectScreenState extends State<AddressSelectScreen> {
                           if (addressText == "Tap on map to select address" ||
                               addressText == "Address not found") {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text("Please select valid address")),
+                              const SnackBar(
+                                content: Text("Please select valid address"),
+                              ),
                             );
                             return;
                           }
 
-                          final address = AddressModel(
-                            id: DateTime.now().millisecondsSinceEpoch.toString(),
+                          // If editing, preserve ID, else generate new
+                          final newAddress = AddressModel(
+                            id:
+                                addressToEdit?.id ??
+                                DateTime.now().millisecondsSinceEpoch
+                                    .toString(),
                             userId: user.id,
-                            title: "Home",
+                            title: "Home", // Could allow user to edit title too
                             fullAddress: addressText,
                             lat: selectedLatLng.latitude,
                             lng: selectedLatLng.longitude,
+                            isSelected: addressToEdit?.isSelected ?? false,
                           );
 
-                          await context.read<AddressStore>().addAddress(address);
+                          if (addressToEdit != null) {
+                            await context.read<AddressStore>().updateAddress(
+                              newAddress,
+                            );
+                          } else {
+                            await context.read<AddressStore>().addAddress(
+                              newAddress,
+                            );
+                          }
 
                           if (!mounted) return;
                           Navigator.pop(context);
                         },
-                        child: const Text(
-                          "Save Address",
-                          style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.bold),
+                        child: Text(
+                          addressToEdit != null
+                              ? "Update Address"
+                              : "Save Address",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ],
@@ -200,100 +246,158 @@ class _AddressSelectScreenState extends State<AddressSelectScreen> {
     final store = context.watch<AddressStore>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Delivery Address"), centerTitle: true),
+      appBar: AppBar(
+        title: const Text("Delivery Address"),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () => _showAddAddressBottomSheet(),
+            icon: const Icon(Icons.add),
+            tooltip: "Add New Address",
+          ),
+        ],
+      ),
       body: store.loading
           ? const Center(child: CircularProgressIndicator())
           : store.addresses.isEmpty
           ? const Center(child: Text("No address saved yet"))
           : ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: store.addresses.length,
-        itemBuilder: (_, i) {
-          final address = store.addresses[i];
-
-          return GestureDetector(
-            onTap: () {
-              store.selectAddressLocal(address.id);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => PaymentMethodScreen(),
-                ),
-              );
-            },
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 12),
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: address.isSelected
-                      ? Colors.teal
-                      : Colors.grey.shade300,
-                  width: 1.5,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.location_on,
-                    color: address.isSelected
-                        ? Colors.teal
-                        : Colors.grey,
-                    size: 28,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          address.title,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: address.isSelected
-                                ? Colors.teal
-                                : Colors.black,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          address.fullAddress,
-                          style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 14,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
+              itemCount: store.addresses.length,
+              itemBuilder: (_, i) {
+                final address = store.addresses[i];
+
+                // Wrap item in Dismissible for delete functionality
+                return Dismissible(
+                  key: Key(address.id),
+                  direction:
+                      DismissDirection.startToEnd, // Swipe Right to Delete
+                  background: Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    alignment: Alignment.centerLeft,
+                    padding: const EdgeInsets.only(left: 20),
+                    child: const Icon(
+                      Icons.delete,
+                      color: Colors.white,
+                      size: 30,
                     ),
                   ),
-                  if (address.isSelected)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
+                  confirmDismiss: (direction) async {
+                    return await showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text("Delete Address"),
+                        content: const Text(
+                          "Are you sure you want to delete this address?",
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(false),
+                            child: const Text("Cancel"),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(true),
+                            child: const Text(
+                              "Delete",
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  onDismissed: (direction) {
+                    store.deleteAddress(address.id);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Address deleted successfully"),
+                      ),
+                    );
+                  },
+                  child: GestureDetector(
+                    onTap: () {
+                      store.selectAddressLocal(address.id);
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.teal,
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Text(
-                        "Selected",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
+                        border: Border.all(
+                          color: address.isSelected
+                              ? Colors.teal
+                              : Colors.grey.shade300,
+                          width: 1.5,
                         ),
                       ),
+                      child: Row(
+                        children: [
+                          // 1. Radio Button for Selection
+                          Transform.scale(
+                            scale: 1.2,
+                            child: Radio<String>(
+                              value: address.id,
+                              groupValue: store.selectedAddress?.id,
+                              activeColor: Colors.teal,
+                              onChanged: (val) {
+                                if (val != null) store.selectAddressLocal(val);
+                              },
+                            ),
+                          ),
+
+                          // 2. Address Details
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  address.title,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: address.isSelected
+                                        ? Colors.teal
+                                        : Colors.black,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  address.fullAddress,
+                                  style: TextStyle(
+                                    color: Colors.grey.shade600,
+                                    fontSize: 14,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // 3. Edit (Pencil) Button
+                          IconButton(
+                            onPressed: () {
+                              _showAddAddressBottomSheet(
+                                addressToEdit: address,
+                              );
+                            },
+                            icon: const Icon(
+                              Icons.edit,
+                              color: Colors.blueGrey,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                ],
-              ),
+                  ),
+                );
+              },
             ),
-          );
-        },
-      ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16),
         child: ElevatedButton(
@@ -304,9 +408,21 @@ class _AddressSelectScreenState extends State<AddressSelectScreen> {
               borderRadius: BorderRadius.circular(8),
             ),
           ),
-          onPressed: _showAddAddressBottomSheet,
+          onPressed: () {
+            // Proceed to Payment
+            if (store.selectedAddress == null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Please select an address")),
+              );
+              return;
+            }
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => PaymentMethodScreen()),
+            );
+          },
           child: const Text(
-            "Add New Address",
+            "Proceed to Payment",
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
         ),
@@ -314,5 +430,3 @@ class _AddressSelectScreenState extends State<AddressSelectScreen> {
     );
   }
 }
-
-

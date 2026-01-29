@@ -227,7 +227,7 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
   /// Builds the horizontal list of circular categories
   Widget _buildCategoriesList() {
     return SizedBox(
-      height: 100,
+      height: 110, // Increased from 100
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: [
@@ -340,12 +340,17 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  "₹${product.price.toStringAsFixed(2)}",
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: Colors.black87,
+                Flexible(
+                  // Prevent price overflow
+                  child: Text(
+                    "₹${product.price.toStringAsFixed(2)}",
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.black87,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                 ),
                 InkWell(
@@ -390,7 +395,7 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
   /// Fetches Real Products from Supabase
   Widget _buildRealBestsellersList() {
     return SizedBox(
-      height: 260,
+      height: 280, // Increased from 260 for safety
       child: FutureBuilder<List<Product>>(
         future: _productRepo.getProducts(),
         builder: (context, snapshot) {
@@ -438,14 +443,14 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const SizedBox(
-            height: 260,
+            height: 280, // Increased from 260
             child: Center(child: CircularProgressIndicator()),
           );
         }
 
         if (snapshot.hasError) {
           return SizedBox(
-            height: 260,
+            height: 280, // Increased from 260
             child: Center(child: Text("Error: ${snapshot.error}")),
           );
         }
@@ -454,13 +459,13 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
 
         if (products.isEmpty) {
           return const SizedBox(
-            height: 260,
+            height: 280, // Increased from 260
             child: Center(child: Text("No products available")),
           );
         }
 
         return SizedBox(
-          height: 260,
+          height: 280, // Increased from 260
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             clipBehavior: Clip.none,
@@ -557,12 +562,17 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            "₹${product.price.toStringAsFixed(2)}",
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              color: Colors.black87,
+                          Flexible(
+                            // Prevent price overflow in list Bestseller
+                            child: Text(
+                              "₹${product.price.toStringAsFixed(2)}",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: Colors.black87,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
                           ),
 
@@ -827,7 +837,7 @@ class _RecentPurchaseCardState extends State<RecentPurchaseCard> {
   /// Displays the actual Recent Purchase details if an order exists.
   Widget _orderUI() {
     return Container(
-      height: 170,
+      constraints: const BoxConstraints(minHeight: 170),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
@@ -851,6 +861,8 @@ class _RecentPurchaseCardState extends State<RecentPurchaseCard> {
           Text(
             "Order ID: ${recentOrder!['id']}",
             style: const TextStyle(color: Colors.white70),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           Text(
             "Items: ${recentOrder!['total_items'] ?? 0}",
