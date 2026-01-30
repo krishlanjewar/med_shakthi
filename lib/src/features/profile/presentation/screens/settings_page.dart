@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'privacy_policy_screen.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -51,8 +53,9 @@ class _SettingsPageState extends State<SettingsPage> {
             subtitle: "View privacy policy",
             icon: Icons.privacy_tip_outlined,
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Privacy Policy Clicked")),
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen()),
               );
             },
           ),
@@ -61,21 +64,7 @@ class _SettingsPageState extends State<SettingsPage> {
             title: "About App",
             subtitle: "Version & details",
             icon: Icons.info_outline,
-            onTap: () {
-              showDialog(
-                context: context,
-                builder: (_) => AlertDialog(
-                  title: const Text("About App"),
-                  content: const Text("Med Shakthi App\nVersion: 1.0.0"),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text("OK"),
-                    )
-                  ],
-                ),
-              );
-            },
+            onTap: _showAboutAppDialog,
           ),
           const SizedBox(height: 12),
           _tileButton(
@@ -87,6 +76,63 @@ class _SettingsPageState extends State<SettingsPage> {
               if (!mounted) return;
               Navigator.pop(context);
             },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showAboutAppDialog() async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    final String version = packageInfo.version;
+    final String buildNumber = packageInfo.buildNumber;
+
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.info, color: Color(0xFF6AA39B)),
+            SizedBox(width: 10),
+            Text("About App", style: TextStyle(fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Med Shakthi",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF2D3B48),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              "Version: $version ($buildNumber)",
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              "A Flutter-based internship project developed under UptoSkills.",
+              style: TextStyle(fontSize: 14),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              "Developed by: Flutter Interns",
+              style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("OK", style: TextStyle(color: Color(0xFF6AA39B))),
           ),
         ],
       ),
@@ -138,11 +184,12 @@ class _SettingsPageState extends State<SettingsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title,
-                      style: const TextStyle(fontWeight: FontWeight.w600)),
+                  Text(
+                    title,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
                   const SizedBox(height: 3),
-                  Text(subtitle,
-                      style: TextStyle(color: Colors.grey.shade600)),
+                  Text(subtitle, style: TextStyle(color: Colors.grey.shade600)),
                 ],
               ),
             ),

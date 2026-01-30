@@ -62,6 +62,13 @@ class CartPage extends StatelessWidget {
                       cart.clearCart();
                     },
                   ),
+
+                  const SizedBox(width: 8),
+
+                  //  Wishlist
+                  _buildIconButton(context, Icons.favorite_border, onTap: () {
+                    // TODO: Add all cart items to wishlist
+                  }),
                   const SizedBox(width: 8),
                   _buildIconButton(context, Icons.share_outlined, onTap: () {}),
                 ],

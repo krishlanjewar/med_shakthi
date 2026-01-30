@@ -7,6 +7,9 @@ import 'package:med_shakthi/src/features/cart/presentation/screens/cart_page.dar
 import 'package:med_shakthi/src/features/orders/orders_page.dart';
 import 'package:med_shakthi/src/features/products/presentation/screens/product_page.dart';
 import 'package:provider/provider.dart';
+import '../orders/chat_screen.dart';
+import '../profile/presentation/screens/ai_assistant_page.dart';
+import '../profile/presentation/screens/chat_details_screen.dart';
 import '../profile/presentation/screens/profile_screen.dart';
 import 'package:med_shakthi/src/features/cart/data/cart_data.dart';
 import 'package:med_shakthi/src/features/cart/data/cart_item.dart';
@@ -58,7 +61,8 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 16),
-            _buildTopBar(), // Top Bar
+            _buildTopBar(),
+            // Top Bar
             const SizedBox(height: 24),
             // MODIFIED: Switched back to RecentPurchaseCard
             // When no order exists, this card will show the Promo Banner design.
@@ -87,8 +91,16 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
   Widget _buildTopBar() {
     return Row(
       children: [
+        // 👤 PROFILE ICON (replaced scanner)
         GestureDetector(
-          onTap: () {},
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const AccountPage(),
+              ),
+            );
+          },
           child: Container(
             height: 50,
             width: 50,
@@ -104,10 +116,17 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
                 ),
               ],
             ),
-            child: const Icon(Icons.crop_free, color: Colors.black87, size: 24),
+            child: const Icon(
+              Icons.person_outline, //  Profile icon
+              color: Colors.black87,
+              size: 26,
+            ),
           ),
         ),
+
         const SizedBox(width: 12),
+
+        //  SEARCH BAR
         Expanded(
           child: Container(
             height: 50,
@@ -132,7 +151,10 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
             ),
           ),
         ),
+
         const SizedBox(width: 12),
+
+        //  CART ICON WITH BADGE
         Stack(
           clipBehavior: Clip.none,
           children: [
@@ -165,7 +187,8 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
                 ),
               ),
             ),
-            // Reactive Cart Badge
+
+            //  CART BADGE
             Consumer<CartData>(
               builder: (context, cartData, child) {
                 if (cartData.items.isEmpty) return const SizedBox.shrink();
@@ -179,7 +202,7 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
                       shape: BoxShape.circle,
                     ),
                     child: Text(
-                      '${cartData.items.length}', // Dynamic Count
+                      '${cartData.items.length}',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 10,
@@ -197,11 +220,9 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
   }
 
   /// Reusable section title with "See All" button
-  Widget _buildSectionTitle(
-    String title,
-    String actionText,
-    VoidCallback onAction,
-  ) {
+  Widget _buildSectionTitle(String title,
+      String actionText,
+      VoidCallback onAction,) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -279,10 +300,11 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
   /// Fetches Real Products from Supabase
   Widget _buildProductCard(Product product) {
     return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => ProductPage(product: product)),
-      ),
+      onTap: () =>
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => ProductPage(product: product)),
+          ),
       child: Container(
         width: 160,
         margin: const EdgeInsets.only(right: 16),
@@ -306,10 +328,12 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
                 child: Image.network(
                   product.image,
                   fit: BoxFit.contain,
-                  errorBuilder: (c, e, s) => Container(
-                    color: Colors.grey[100],
-                    child: const Center(child: Icon(Icons.image_not_supported)),
-                  ),
+                  errorBuilder: (c, e, s) =>
+                      Container(
+                        color: Colors.grey[100],
+                        child: const Center(
+                            child: Icon(Icons.image_not_supported)),
+                      ),
                 ),
               ),
             ),
@@ -475,12 +499,13 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
 
               return GestureDetector(
                 //  Product details page open (same as before)
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ProductPage(product: product),
-                  ),
-                ),
+                onTap: () =>
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ProductPage(product: product),
+                      ),
+                    ),
                 child: Container(
                   width: 160,
                   margin: const EdgeInsets.only(right: 16),
@@ -505,12 +530,13 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
                           child: Image.network(
                             product.image,
                             fit: BoxFit.contain,
-                            errorBuilder: (c, e, s) => Container(
-                              color: Colors.grey[100],
-                              child: const Center(
-                                child: Icon(Icons.image_not_supported),
-                              ),
-                            ),
+                            errorBuilder: (c, e, s) =>
+                                Container(
+                                  color: Colors.grey[100],
+                                  child: const Center(
+                                    child: Icon(Icons.image_not_supported),
+                                  ),
+                                ),
                           ),
                         ),
                       ),
@@ -584,7 +610,8 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
                               // so we do: onTapDown trick not needed, just use InkWell here
 
                               final cartItem = CartItem(
-                                id: product.id, //  UUID from Supabase
+                                id: product.id,
+                                //  UUID from Supabase
                                 name: product.name,
                                 title: product.name,
                                 brand: product.category,
@@ -641,9 +668,14 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
     final navItems = [
       {'icon': Icons.home, 'label': 'Home'},
       {'icon': Icons.grid_view, 'label': 'Category'},
-      {'icon': Icons.favorite_border, 'label': 'Wishlist'},
+
+      //  Chatbot (Wishlist replaced)
+      {'icon': Icons.chat_bubble_outline, 'label': 'Chatbot'},
+
       {'icon': Icons.receipt_long, 'label': 'Order'},
-      {'icon': Icons.person_outline, 'label': 'Profile'},
+
+      //  AI (Profile replaced)
+      {'icon': Icons.smart_toy, 'label': 'AI'},
     ];
 
     return Container(
@@ -682,26 +714,32 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
     return GestureDetector(
       onTap: () {
         if (index == 4) {
+          //  AI Page
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  const AccountPage(), // Ensure this widget name matches your class
+              builder: (_) => const AiAssistantPage(),
             ),
           );
         } else if (index == 3) {
-          // --- NAVIGATION TO ORDER SCREEN ---
+          //  Orders Page
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => OrdersPage()),
+            MaterialPageRoute(builder: (_) => OrdersPage()),
+          );
+        } else if (index == 2) {
+          //  Chatbot Page
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const ChatDetailScreen(clientName: 'Abhishek',)),
           );
         } else {
-          // For other buttons, just update the UI selection
+          // Home / Category
           setState(() => _selectedIndex = index);
         }
       },
       child: Container(
-        color: Colors.transparent, // Increases touch area
+        color: Colors.transparent,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -716,7 +754,8 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
               style: TextStyle(
                 color: isSelected ? const Color(0xFF5A9CA0) : Colors.grey,
                 fontSize: 10,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                fontWeight:
+                isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
             ),
           ],
@@ -726,7 +765,7 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
   }
 }
 
-/// A stateful widget that fetches the most recent order.
+  /// A stateful widget that fetches the most recent order.
 /// If no order is found, it displays the PROMO BANNER (from screenshot).
 class RecentPurchaseCard extends StatefulWidget {
   const RecentPurchaseCard({super.key});
