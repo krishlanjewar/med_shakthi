@@ -97,9 +97,9 @@ class _SupplierProfileScreenState extends State<SupplierProfileScreen> {
       } catch (e) {
         debugPrint('Error fetching profile: $e');
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error loading profile: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error loading profile: $e')));
         }
       } finally {
         if (mounted) setState(() => _isLoading = false);
@@ -113,19 +113,22 @@ class _SupplierProfileScreenState extends State<SupplierProfileScreen> {
     if (user == null) return;
 
     try {
-      await supabase.from('suppliers').update({
-        'company_name': _companyNameController.text,
-        'name': _supplierNameController.text,
-        'phone': _phoneController.text,
-        'company_address': _addressController.text,
-        'city': _cityController.text,
-        'state': _stateController.text,
-        'pincode': _pincodeController.text,
-        'country': _countryController.text,
-        'drug_license_number': _drugLicenseController.text,
-        'gst_number': _gstController.text,
-        'pan_number': _panController.text,
-      }).eq('user_id', user.id);
+      await supabase
+          .from('suppliers')
+          .update({
+            'company_name': _companyNameController.text,
+            'name': _supplierNameController.text,
+            'phone': _phoneController.text,
+            'company_address': _addressController.text,
+            'city': _cityController.text,
+            'state': _stateController.text,
+            'pincode': _pincodeController.text,
+            'country': _countryController.text,
+            'drug_license_number': _drugLicenseController.text,
+            'gst_number': _gstController.text,
+            'pan_number': _panController.text,
+          })
+          .eq('user_id', user.id);
 
       setState(() => _isEditing = false);
 
@@ -137,9 +140,9 @@ class _SupplierProfileScreenState extends State<SupplierProfileScreen> {
     } catch (e) {
       debugPrint('Error updating profile: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to update: $e')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -173,64 +176,127 @@ class _SupplierProfileScreenState extends State<SupplierProfileScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            // 1. Header Profile Card (Existing UI)
-            _buildProfileHeader(),
-            const SizedBox(height: 20),
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  // 1. Header Profile Card (Existing UI)
+                  _buildProfileHeader(),
+                  const SizedBox(height: 20),
 
-            // 2. Business Details Section
-            _buildExpansionSection(
-              title: "Business Details",
-              icon: Icons.business,
-              children: [
-                _buildInfoRow(Icons.business_center, "Type", _companyType, isEditable: false),
-                _buildInfoRow(Icons.person, "Owner", _supplierNameController.text, controller: _supplierNameController),
-                _buildInfoRow(Icons.phone, "Phone", _phoneController.text, controller: _phoneController),
-                _buildInfoRow(Icons.email, "Email", _email, isEditable: false), // Email usually not editable directly
-              ],
+                  // 2. Business Details Section
+                  _buildExpansionSection(
+                    title: "Business Details",
+                    icon: Icons.business,
+                    children: [
+                      _buildInfoRow(
+                        Icons.business_center,
+                        "Type",
+                        _companyType,
+                        isEditable: false,
+                      ),
+                      _buildInfoRow(
+                        Icons.person,
+                        "Owner",
+                        _supplierNameController.text,
+                        controller: _supplierNameController,
+                      ),
+                      _buildInfoRow(
+                        Icons.phone,
+                        "Phone",
+                        _phoneController.text,
+                        controller: _phoneController,
+                      ),
+                      _buildInfoRow(
+                        Icons.email,
+                        "Email",
+                        _email,
+                        isEditable: false,
+                      ), // Email usually not editable directly
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // 3. Address Section
+                  _buildExpansionSection(
+                    title: "Address",
+                    icon: Icons.location_on,
+                    children: [
+                      _buildInfoRow(
+                        Icons.location_city,
+                        "City",
+                        _cityController.text,
+                        controller: _cityController,
+                      ),
+                      _buildInfoRow(
+                        Icons.map,
+                        "State",
+                        _stateController.text,
+                        controller: _stateController,
+                      ),
+                      _buildInfoRow(
+                        Icons.pin_drop,
+                        "Pincode",
+                        _pincodeController.text,
+                        controller: _pincodeController,
+                      ),
+                      _buildInfoRow(
+                        Icons.public,
+                        "Country",
+                        _countryController.text,
+                        controller: _countryController,
+                      ),
+                      _buildInfoRow(
+                        Icons.home,
+                        "Full Address",
+                        _addressController.text,
+                        controller: _addressController,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // 4. Legal & Tax Section
+                  _buildExpansionSection(
+                    title: "Legal & Licenses",
+                    icon: Icons.verified_user,
+                    children: [
+                      _buildInfoRow(
+                        Icons.assignment,
+                        "Drug License",
+                        _drugLicenseController.text,
+                        controller: _drugLicenseController,
+                      ),
+                      _buildInfoRow(
+                        Icons.calendar_today,
+                        "License Expiry",
+                        _drugLicenseExpiry,
+                        isEditable: false,
+                      ),
+                      _buildInfoRow(
+                        Icons.receipt_long,
+                        "GST Number",
+                        _gstController.text,
+                        controller: _gstController,
+                      ),
+                      _buildInfoRow(
+                        Icons.badge,
+                        "PAN Number",
+                        _panController.text,
+                        controller: _panController,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  // 5. Account Actions
+                  _buildSectionTitle("Settings"),
+                  _buildMenuOption(Icons.settings, "Account Settings", () {}),
+                  _buildMenuOption(Icons.notifications, "Notifications", () {}),
+                  _buildMenuOption(Icons.help, "Help & Support", () {}),
+                  _buildMenuOption(Icons.logout, "Logout", _handleLogout),
+                ],
+              ),
             ),
-            const SizedBox(height: 16),
-
-            // 3. Address Section
-            _buildExpansionSection(
-              title: "Address",
-              icon: Icons.location_on,
-              children: [
-                _buildInfoRow(Icons.location_city, "City", _cityController.text, controller: _cityController),
-                _buildInfoRow(Icons.map, "State", _stateController.text, controller: _stateController),
-                _buildInfoRow(Icons.pin_drop, "Pincode", _pincodeController.text, controller: _pincodeController),
-                _buildInfoRow(Icons.public, "Country", _countryController.text, controller: _countryController),
-                _buildInfoRow(Icons.home, "Full Address", _addressController.text, controller: _addressController),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // 4. Legal & Tax Section
-            _buildExpansionSection(
-              title: "Legal & Licenses",
-              icon: Icons.verified_user,
-              children: [
-                _buildInfoRow(Icons.assignment, "Drug License", _drugLicenseController.text, controller: _drugLicenseController),
-                _buildInfoRow(Icons.calendar_today, "License Expiry", _drugLicenseExpiry, isEditable: false),
-                _buildInfoRow(Icons.receipt_long, "GST Number", _gstController.text, controller: _gstController),
-                _buildInfoRow(Icons.badge, "PAN Number", _panController.text, controller: _panController),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // 5. Account Actions
-            _buildSectionTitle("Settings"),
-            _buildMenuOption(
-                Icons.settings, "Account Settings", () {}),
-            _buildMenuOption(
-                Icons.notifications, "Notifications", () {}),
-            _buildMenuOption(Icons.help, "Help & Support", () {}),
-            _buildMenuOption(Icons.logout, "Logout", _handleLogout),
-          ],
-        ),
-      ),
     );
   }
 
@@ -242,7 +308,7 @@ class _SupplierProfileScreenState extends State<SupplierProfileScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.05),
+            color: Colors.grey.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -254,7 +320,7 @@ class _SupplierProfileScreenState extends State<SupplierProfileScreen> {
             children: [
               CircleAvatar(
                 radius: 40,
-                backgroundColor: const Color(0xFF4C8077).withOpacity(0.1),
+                backgroundColor: const Color(0xFF4C8077).withValues(alpha: 0.1),
                 child: Text(
                   _companyNameController.text.isNotEmpty
                       ? _companyNameController.text[0].toUpperCase()
@@ -275,39 +341,46 @@ class _SupplierProfileScreenState extends State<SupplierProfileScreen> {
                     color: Colors.white,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.verified, color: Colors.blue, size: 20),
+                  child: const Icon(
+                    Icons.verified,
+                    color: Colors.blue,
+                    size: 20,
+                  ),
                 ),
-              )
+              ),
             ],
           ),
           const SizedBox(height: 12),
           // Editable Company Name if in editing mode
           _isEditing
               ? TextField(
-            controller: _companyNameController,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            decoration: const InputDecoration(
-              hintText: "Company Name",
-              border: UnderlineInputBorder(),
-            ),
-          )
+                  controller: _companyNameController,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  decoration: const InputDecoration(
+                    hintText: "Company Name",
+                    border: UnderlineInputBorder(),
+                  ),
+                )
               : Text(
-            _companyNameController.text,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
+                  _companyNameController.text,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
           const SizedBox(height: 4),
-          Text(
-            _email,
-            style: TextStyle(color: Colors.grey[600], fontSize: 14),
-          ),
+          Text(_email, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
               color: _status == 'APPROVED' || _status == 'Verified'
-                  ? Colors.green.withOpacity(0.1)
-                  : Colors.orange.withOpacity(0.1),
+                  ? Colors.green.withValues(alpha: 0.1)
+                  : Colors.orange.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
@@ -331,7 +404,7 @@ class _SupplierProfileScreenState extends State<SupplierProfileScreen> {
                 color: Colors.grey,
               ),
             ),
-          ]
+          ],
         ],
       ),
     );
@@ -354,7 +427,7 @@ class _SupplierProfileScreenState extends State<SupplierProfileScreen> {
           leading: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFF4C8077).withOpacity(0.1),
+              color: const Color(0xFF4C8077).withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: const Color(0xFF4C8077), size: 20),
@@ -367,7 +440,10 @@ class _SupplierProfileScreenState extends State<SupplierProfileScreen> {
               color: Colors.black87,
             ),
           ),
-          childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          childrenPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 10,
+          ),
           children: children,
         ),
       ),
@@ -375,7 +451,13 @@ class _SupplierProfileScreenState extends State<SupplierProfileScreen> {
   }
 
   // Modified helper to support editing
-  Widget _buildInfoRow(IconData icon, String label, String value, {TextEditingController? controller, bool isEditable = true}) {
+  Widget _buildInfoRow(
+    IconData icon,
+    String label,
+    String value, {
+    TextEditingController? controller,
+    bool isEditable = true,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
@@ -448,8 +530,7 @@ class _SupplierProfileScreenState extends State<SupplierProfileScreen> {
     );
   }
 
-  Widget _buildMenuOption(
-      IconData icon, String title, VoidCallback onTap) {
+  Widget _buildMenuOption(IconData icon, String title, VoidCallback onTap) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -461,16 +542,20 @@ class _SupplierProfileScreenState extends State<SupplierProfileScreen> {
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: const Color(0xFF4C8077).withOpacity(0.1),
+            color: const Color(0xFF4C8077).withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
           child: Icon(icon, color: const Color(0xFF4C8077), size: 20),
         ),
-        title: Text(title,
-            style:
-            const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
-        trailing:
-        const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+        title: Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+        ),
+        trailing: const Icon(
+          Icons.arrow_forward_ios,
+          size: 16,
+          color: Colors.grey,
+        ),
         onTap: onTap,
       ),
     );
@@ -481,7 +566,7 @@ class _SupplierProfileScreenState extends State<SupplierProfileScreen> {
     if (mounted) {
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const LoginPage()),
-            (route) => false,
+        (route) => false,
       );
     }
   }

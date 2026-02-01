@@ -97,14 +97,11 @@ class OrderCard extends StatelessWidget {
             Text('Payment: ${order['payment_status']}'),
             const Divider(),
 
-            const Text(
-              'Items:',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
+            const Text('Items:', style: TextStyle(fontWeight: FontWeight.bold)),
 
-            ...items.map((item) => Text(
-                  '• ${item['product']} × ${item['qty']}',
-                )),
+            ...items.map(
+              (item) => Text('• ${item['product']} × ${item['qty']}'),
+            ),
 
             const SizedBox(height: 10),
 
@@ -117,8 +114,7 @@ class OrderCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 10),
                   OutlinedButton(
-                    onPressed: () =>
-                        rejectOrder(context, order['id']),
+                    onPressed: () => rejectOrder(context, order['id']),
                     child: const Text('Reject'),
                   ),
                 ],
@@ -158,9 +154,7 @@ Future<void> rejectOrder(BuildContext context, String orderId) async {
       title: const Text('Reject Order'),
       content: TextField(
         controller: controller,
-        decoration: const InputDecoration(
-          hintText: 'Reason for rejection',
-        ),
+        decoration: const InputDecoration(hintText: 'Reason for rejection'),
       ),
       actions: [
         TextButton(
@@ -177,6 +171,7 @@ Future<void> rejectOrder(BuildContext context, String orderId) async {
                 })
                 .eq('id', orderId);
 
+            if (!context.mounted) return;
             Navigator.pop(context);
           },
           child: const Text('Reject'),

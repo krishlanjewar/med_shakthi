@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:med_shakthi/src/features/orders/chat_screen.dart';
 import 'models/order_item_model.dart';
 
-
 class OrderDetailScreen extends StatelessWidget {
   final OrderItem order;
 
@@ -45,7 +44,7 @@ class OrderDetailScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -60,10 +59,7 @@ class OrderDetailScreen extends StatelessWidget {
                       color: Colors.grey.shade100,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Image.asset(
-                      order.imagePath,
-                      fit: BoxFit.cover,
-                    ),
+                    child: Image.asset(order.imagePath, fit: BoxFit.cover),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -113,10 +109,7 @@ class OrderDetailScreen extends StatelessWidget {
             // Track Order
             const Text(
               'Track Order',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 16),
             _buildTrackOrderStrip(),
@@ -133,7 +126,7 @@ class OrderDetailScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -170,7 +163,7 @@ class OrderDetailScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -210,7 +203,7 @@ class OrderDetailScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -221,20 +214,21 @@ class OrderDetailScreen extends StatelessWidget {
                 children: [
                   const Text(
                     'Order Summary',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 16),
-                  _buildSummaryRow('Subtotal',
-                      '\$${(order.price * order.quantity).toStringAsFixed(2)}'),
+                  _buildSummaryRow(
+                    'Subtotal',
+                    '\$${(order.price * order.quantity).toStringAsFixed(2)}',
+                  ),
                   _buildSummaryRow('Discount', '-\$0.00'),
                   _buildSummaryRow('Delivery Cost', '\$5.00'),
                   const Divider(),
-                  _buildSummaryRow('Total',
-                      '\$${(order.price * order.quantity + 5.00).toStringAsFixed(2)}',
-                      isTotal: true),
+                  _buildSummaryRow(
+                    'Total',
+                    '\$${(order.price * order.quantity + 5.00).toStringAsFixed(2)}',
+                    isTotal: true,
+                  ),
                 ],
               ),
             ),
@@ -257,7 +251,7 @@ class OrderDetailScreen extends StatelessWidget {
                               profileImage: '',
                               phone: '+91 9876543210',
                               email:
-                              '${order.brand.toLowerCase()}@medstore.com',
+                                  '${order.brand.toLowerCase()}@medstore.com',
                               isOnline: true,
                             ),
                           ),
@@ -387,7 +381,7 @@ class OrderDetailScreen extends StatelessWidget {
       'orderaccepted',
       'packagingandshipping',
       'in transit',
-      'packageDelivered'
+      'packageDelivered',
     ];
     final currentIndex = statuses.indexOf(order.status);
 
@@ -398,7 +392,7 @@ class OrderDetailScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -424,8 +418,9 @@ class OrderDetailScreen extends StatelessWidget {
                         : Colors.grey.shade300,
                     border: isCurrent
                         ? Border.all(
-                        color: _getStatusColor(statuses[circleIndex]),
-                        width: 3)
+                            color: _getStatusColor(statuses[circleIndex]),
+                            width: 3,
+                          )
                         : null,
                   ),
                   child: isCompleted

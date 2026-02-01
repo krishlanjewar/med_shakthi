@@ -24,27 +24,27 @@ class _SupplierCategoryPageState extends State<SupplierCategoryPage> {
     {
       "name": "Medicines",
       "icon": Icons.medication_outlined,
-      "items": ["Tablets", "Syrups", "Capsules", "Injections", "Pain Relief"]
+      "items": ["Tablets", "Syrups", "Capsules", "Injections", "Pain Relief"],
     },
     {
       "name": "Supplements",
       "icon": Icons.local_pharmacy_outlined,
-      "items": ["Protein", "Vitamins", "Omega 3", "Weight Gain", "Immunity"]
+      "items": ["Protein", "Vitamins", "Omega 3", "Weight Gain", "Immunity"],
     },
     {
       "name": "Personal Care",
       "icon": Icons.spa_outlined,
-      "items": ["Skin Care", "Hair Care", "Body Care", "Cosmetics"]
+      "items": ["Skin Care", "Hair Care", "Body Care", "Cosmetics"],
     },
     {
       "name": "Baby Care",
       "icon": Icons.child_friendly_outlined,
-      "items": ["Diapers", "Baby Food", "Baby Lotion", "Baby Soap"]
+      "items": ["Diapers", "Baby Food", "Baby Lotion", "Baby Soap"],
     },
     {
       "name": "Devices",
       "icon": Icons.monitor_heart_outlined,
-      "items": ["BP Monitor", "Thermometer", "Glucometer", "Nebulizer"]
+      "items": ["BP Monitor", "Thermometer", "Glucometer", "Nebulizer"],
     },
   ];
 
@@ -80,10 +80,7 @@ class _SupplierCategoryPageState extends State<SupplierCategoryPage> {
         backgroundColor: Colors.white,
         centerTitle: true,
         automaticallyImplyLeading: false,
-        title: const Text(
-          "Categories",
-          style: TextStyle(color: Colors.black),
-        ),
+        title: const Text("Categories", style: TextStyle(color: Colors.black)),
       ),
       body: Column(
         children: [
@@ -120,61 +117,61 @@ class _SupplierCategoryPageState extends State<SupplierCategoryPage> {
                     color: Colors.white,
                     child: sidebarVisible
                         ? ListView.builder(
-                      itemCount: categories.length,
-                      itemBuilder: (context, index) {
-                        final cat = categories[index];
-                        final isSelected =
-                            index == selectedCategoryIndex;
+                            itemCount: categories.length,
+                            itemBuilder: (context, index) {
+                              final cat = categories[index];
+                              final isSelected = index == selectedCategoryIndex;
 
-                        return InkWell(
-                          onTap: () {
-                            setState(() {
-                              selectedCategoryIndex = index;
-                              selectedSubCategory = null;
-                              products.clear();
-                            });
-                          },
-                          child: Container(
-                            padding:
-                            const EdgeInsets.symmetric(vertical: 14),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? themeColor.withOpacity(0.12)
-                                  : Colors.white,
-                              border: Border(
-                                left: BorderSide(
-                                  color: isSelected
-                                      ? themeColor
-                                      : Colors.transparent,
-                                  width: 4,
-                                ),
-                              ),
-                            ),
-                            child: Column(
-                              children: [
-                                Icon(
-                                  cat["icon"],
-                                  color: isSelected
-                                      ? themeColor
-                                      : Colors.grey,
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  cat["name"],
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: isSelected
-                                        ? FontWeight.w700
-                                        : FontWeight.w500,
+                              return InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    selectedCategoryIndex = index;
+                                    selectedSubCategory = null;
+                                    products.clear();
+                                  });
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? themeColor.withValues(alpha: 0.12)
+                                        : Colors.white,
+                                    border: Border(
+                                      left: BorderSide(
+                                        color: isSelected
+                                            ? themeColor
+                                            : Colors.transparent,
+                                        width: 4,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Icon(
+                                        cat["icon"],
+                                        color: isSelected
+                                            ? themeColor
+                                            : Colors.grey,
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        cat["name"],
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: isSelected
+                                              ? FontWeight.w700
+                                              : FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    )
+                              );
+                            },
+                          )
                         : const SizedBox.shrink(),
                   ),
                   Expanded(
@@ -188,58 +185,60 @@ class _SupplierCategoryPageState extends State<SupplierCategoryPage> {
                                 ? selectedCategory["name"]
                                 : "${selectedCategory["name"]} → $selectedSubCategory",
                             style: const TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           const SizedBox(height: 12),
                           Expanded(
                             child: loadingProducts
                                 ? const Center(
-                              child: CircularProgressIndicator(),
-                            )
+                                    child: CircularProgressIndicator(),
+                                  )
                                 : GridView.builder(
-                              itemCount: selectedSubCategory == null
-                                  ? (selectedCategory["items"] as List)
-                                  .length
-                                  : products.length,
-                              gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                mainAxisSpacing: 14,
-                                crossAxisSpacing: 14,
-                                childAspectRatio: 1.2,
-                              ),
-                              itemBuilder: (context, i) {
-                                if (selectedSubCategory == null) {
-                                  final itemName =
-                                  (selectedCategory["items"] as List)[
-                                  i];
-                                  return InkWell(
-                                    onTap: () {
-                                      setState(() {
-                                        selectedSubCategory = itemName;
-                                      });
-                                      fetchProducts(
-                                        category:
-                                        selectedCategory["name"],
-                                        subCategory: itemName,
-                                      );
+                                    itemCount: selectedSubCategory == null
+                                        ? (selectedCategory["items"] as List)
+                                              .length
+                                        : products.length,
+                                    gridDelegate:
+                                        const SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: 2,
+                                          mainAxisSpacing: 14,
+                                          crossAxisSpacing: 14,
+                                          childAspectRatio: 1.2,
+                                        ),
+                                    itemBuilder: (context, i) {
+                                      if (selectedSubCategory == null) {
+                                        final itemName =
+                                            (selectedCategory["items"]
+                                                as List)[i];
+                                        return InkWell(
+                                          onTap: () {
+                                            setState(() {
+                                              selectedSubCategory = itemName;
+                                            });
+                                            fetchProducts(
+                                              category:
+                                                  selectedCategory["name"],
+                                              subCategory: itemName,
+                                            );
+                                          },
+                                          child: _buildTile(
+                                            title: itemName,
+                                            icon: Icons.category_outlined,
+                                          ),
+                                        );
+                                      } else {
+                                        final product = products[i];
+                                        return _buildTile(
+                                          title: product['name'],
+                                          subtitle:
+                                              "₹${product['price'] ?? '--'}",
+                                          icon: Icons.medication,
+                                        );
+                                      }
                                     },
-                                    child: _buildTile(
-                                      title: itemName,
-                                      icon: Icons.category_outlined,
-                                    ),
-                                  );
-                                } else {
-                                  final product = products[i];
-                                  return _buildTile(
-                                    title: product['name'],
-                                    subtitle:
-                                    "₹${product['price'] ?? '--'}",
-                                    icon: Icons.medication,
-                                  );
-                                }
-                              },
-                            ),
+                                  ),
                           ),
                         ],
                       ),
@@ -266,7 +265,7 @@ class _SupplierCategoryPageState extends State<SupplierCategoryPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -285,7 +284,7 @@ class _SupplierCategoryPageState extends State<SupplierCategoryPage> {
           if (subtitle != null) ...[
             const SizedBox(height: 4),
             Text(subtitle, style: const TextStyle(fontSize: 12)),
-          ]
+          ],
         ],
       ),
     );

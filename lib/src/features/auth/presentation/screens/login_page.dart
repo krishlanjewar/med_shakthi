@@ -56,7 +56,10 @@ class _LoginPageState extends State<LoginPage> {
         if (!mounted) return;
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Login successful'), backgroundColor: Colors.green),
+          const SnackBar(
+            content: Text('Login successful'),
+            backgroundColor: Colors.green,
+          ),
         );
 
         // 🔀 Navigation Logic
@@ -66,7 +69,7 @@ class _LoginPageState extends State<LoginPage> {
             MaterialPageRoute(
               builder: (BuildContext context) => const SupplierDashboard(),
             ),
-                (route) => false,
+            (route) => false,
           );
         } else {
           // Navigate to User/Pharmacy Home
@@ -74,7 +77,7 @@ class _LoginPageState extends State<LoginPage> {
             MaterialPageRoute(
               builder: (BuildContext context) => const PharmacyHomeScreen(),
             ),
-                (route) => false,
+            (route) => false,
           );
         }
       }
@@ -134,7 +137,7 @@ class _LoginPageState extends State<LoginPage> {
                         borderRadius: BorderRadius.circular(22),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.12),
+                            color: Colors.black.withValues(alpha: 0.12),
                             blurRadius: 12,
                             offset: const Offset(0, 6),
                           ),
@@ -146,7 +149,11 @@ class _LoginPageState extends State<LoginPage> {
                           'assets/images/logo.png',
                           fit: BoxFit.contain,
                           errorBuilder: (context, error, stackTrace) =>
-                          const Icon(Icons.local_pharmacy, size: 40, color: Color(0xFF6AA39B)),
+                              const Icon(
+                                Icons.local_pharmacy,
+                                size: 40,
+                                color: Color(0xFF6AA39B),
+                              ),
                         ),
                       ),
                     ),
@@ -155,7 +162,7 @@ class _LoginPageState extends State<LoginPage> {
                   _label('Email'),
                   _textField(
                     controller: _emailController,
-                    hint: 'Email address@gmail.com',
+                    hint: 'emailaddress@gmail.com',
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) => value != null && value.contains('@')
                         ? null
@@ -209,17 +216,20 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       child: _isLoading
                           ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
-                      )
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
                           : const Text(
-                        'Login',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                              'Login',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                     ),
                   ),
                   const SizedBox(height: 30),
@@ -355,7 +365,7 @@ class _LoginPageState extends State<LoginPage> {
         shape: BoxShape.circle,
         color: Colors.white,
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 8),
         ],
       ),
       child: Icon(icon, color: color, size: 30),

@@ -56,13 +56,10 @@ class _TopBar extends StatefulWidget {
 }
 
 class _TopBarState extends State<_TopBar> {
-  // ✅ SHARED INSTANCE (FIX)
-  static final WishlistService wishlistService = WishlistService(
-    userId: 'demo-user',
-  );
-
   @override
   Widget build(BuildContext context) {
+    // Watch for changes to update the heart icon
+    final wishlistService = context.watch<WishlistService>();
     final bool isWishlisted = wishlistService.isInWishlist(widget.product.id);
 
     return Padding(
@@ -93,11 +90,13 @@ class _TopBarState extends State<_TopBar> {
 
           // ❤️ FIXED WISHLIST ICON
           InkWell(
-            onTap: () async {
+            onTap: () {
               if (isWishlisted) {
-                await wishlistService.removeFromWishlist(widget.product.id);
+                context.read<WishlistService>().removeFromWishlist(
+                  widget.product.id,
+                );
               } else {
-                await wishlistService.addToWishlist(
+                context.read<WishlistService>().addToWishlist(
                   WishlistItem(
                     id: widget.product.id,
                     name: widget.product.name,
@@ -106,7 +105,6 @@ class _TopBarState extends State<_TopBar> {
                   ),
                 );
               }
-              setState(() {});
             },
             child: Icon(
               isWishlisted ? Icons.favorite : Icons.favorite_border,
@@ -179,7 +177,7 @@ class _ProductInfoSection extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            "\$${product.price}",
+            "₹${product.price}",
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ],
@@ -213,7 +211,7 @@ class _SelectPharmacyCard extends StatelessWidget {
                 style: TextStyle(fontSize: 14),
               ),
             ),
-            Text('\$18.99', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text('₹18.99', style: TextStyle(fontWeight: FontWeight.bold)),
           ],
         ),
       ),
@@ -279,7 +277,7 @@ class _BottomBar extends StatelessWidget {
               ),
             ),
             child: Text(
-              "Add to Cart  •  \$${product.price}",
+              "Add to Cart  •  ₹${product.price}",
               style: const TextStyle(fontSize: 16),
             ),
           ),

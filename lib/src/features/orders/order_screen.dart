@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'models/order_item_model.dart';
 
-
 class OrderDetailScreen extends StatelessWidget {
   final OrderItem order;
 
@@ -69,10 +68,10 @@ class OrderDetailScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(14),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
-                  )
+                  ),
                 ],
               ),
               child: Row(
@@ -147,10 +146,12 @@ class OrderDetailScreen extends StatelessWidget {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Container(
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
+                      color: statusColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: Text(
@@ -160,7 +161,7 @@ class OrderDetailScreen extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -220,10 +221,7 @@ class OrderDetailScreen extends StatelessWidget {
         children: [
           Text(
             title,
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey.shade700,
-            ),
+            style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
           ),
           Text(
             value,

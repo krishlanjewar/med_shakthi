@@ -172,7 +172,7 @@ class _AccountPageState extends State<AccountPage> {
                       color: Colors.white,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.03),
+                          color: Colors.black.withValues(alpha: 0.03),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),
@@ -190,7 +190,7 @@ class _AccountPageState extends State<AccountPage> {
                                 radius: 34,
                                 backgroundColor: const Color(
                                   0xFF6AA39B,
-                                ).withOpacity(0.12),
+                                ).withValues(alpha: 0.12),
                                 backgroundImage: _profileImage != null
                                     ? FileImage(_profileImage!)
                                     : null,

@@ -1,74 +1,101 @@
-# Med_Shakthi 🩺💊
+<div align="center">
 
-Med_Shakthi is a **Flutter-based internship project** developed under **UptoSkills** as part of my role as a **Flutter App Development Intern**.  
-This project focuses on building a **real-world mobile application** with clean UI, backend integration, and practical state management rather than tutorial-level features.
+  <h1>🩺 Med Shakthi</h1>
+  
+  <p>
+    A robust <strong>Flutter-based Healthcare Application</strong> managing medicines, orders, and patient data with real-time sync.
+  </p>
 
----
+  <p>
+    <img src="https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white" alt="Flutter" />
+    <img src="https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white" alt="Dart" />
+    <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
+    <img src="https://img.shields.io/badge/Google%20Maps-4285F4?style=for-the-badge&logo=googlemaps&logoColor=white" alt="Google Maps" />
+  </p>
+  
+  <p>
+    <a href="#-about-the-project">About The Project</a> •
+    <a href="#-key-features">Key Features</a> •
+    <a href="#-tech-stack">Tech Stack</a> •
+    <a href="#-installation">Installation</a> •
+    <a href="#-developer">Developer</a>
+  </p>
 
-## 📌 Project Overview
+</div>
 
-Med_Shakthi is designed to simulate a healthcare/medicine-related application with emphasis on:
-- Scalable Flutter UI
-- Secure authentication
-- Real-time and persistent data handling
-- Production-like app behavior
+<br />
 
-This project helped me understand how **actual apps behave in real conditions**, including data sync, refresh handling, and state consistency.
+## 📌 About The Project
 
----
+**Med Shakthi** is a production-grade mobile application developed during my internship at **UptoSkills**. 
 
-## 👨‍💻 Role & Responsibility
+Unlike typical tutorial apps, this project focuses on **real-world engineering challenges**: handling data persistence, managing complex state across screens, ensuring secure authentication with Supabase, and integrating location services.
 
-**Role:** Flutter App Developer Intern  
-**Organization:** UptoSkills  
-
-As a Flutter developer, I was responsible for:
-- Designing responsive and reusable Flutter UI components
-- Managing application state and app refresh behavior
-- Integrating backend services
-- Handling local and cloud data persistence
-- Debugging real-world issues instead of guided tutorial bugs
-
----
-
-## 🛠️ Tech Stack & Tools
-
-- **Flutter & Dart** – Core app development
-- **Supabase** – Authentication & database
-- **Hive** – Local offline storage
-- **SharedPreferences** – Lightweight persistent data
-- **Material UI** – Clean and consistent UI design
+> **Note:** This project serves as an educational milestone demonstrating scalable architecture and professional Flutter development practices.
 
 ---
 
-## ✨ Key Learnings
+## 🚀 Key Features
 
-Through this project, I learned:
-- How real production apps handle shared and persistent data
-- Difference between tutorial apps and real-world apps
-- Managing app refresh, rebuilds, and state loss
-- Backend integration using Supabase
-- Writing cleaner, reusable, and scalable Flutter code
-- Debugging under time and requirement constraints
+*   **🔐 Secure Authentication**: Robust login/signup flow powered by Supabase Auth.
+*   **🛒 Dynamic Cart & Checkout**: Real-time cart management with currency localization (`₹`) and conditional shipping logic.
+*   **📍 Location Services**: Integrated Google Maps for address selection with geocoding support.
+*   **📦 Order Management**: "Recent Purchases" and "Bestseller" analytics visualization.
+*   **💾 Offline Persistence**: Optimistic UI updates and local caching using SharedPreferences and Hive.
+*   **🎨 Modern UI/UX**: Custom `SliverAppBar` animations, glassmorphism elements, and smooth transitions.
+*   **🛡️ Privacy & Compliance**: Dedicated Privacy Policy module with professional legal structuring.
 
 ---
 
-## 📂 Project Status
+## 🛠 Tech Stack
 
-- Internship project under **UptoSkills**
-- Focused on learning and implementation
-- Not intended as a commercial product
+| Component | Technology | Description |
+| :--- | :--- | :--- |
+| **Framework** | ![Flutter](https://img.shields.io/badge/Flutter-%2302569B.svg?style=flat&logo=Flutter&logoColor=white) | Cross-platform UI toolkit |
+| **Language** | ![Dart](https://img.shields.io/badge/dart-%230175C2.svg?style=flat&logo=dart&logoColor=white) | Strongly typed, async-first language |
+| **Backend** | ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat&logo=supabase&logoColor=white) | Auth & Realtime Database (PostgreSQL) |
+| **Navigation** | **Google Maps API** | Geolocation & Geocoding |
+| **State Mgt** | **Provider** | Efficient state injection & management |
+| **Storage** | **SharedPrefs / Hive** | Local data persistence |
+
+---
+
+## ⚡ Installation
+
+Clone the repository and install dependencies to run the app locally.
+
+```bash
+# Clone this repository
+git clone https://github.com/Subhuu/med_shakthi.git
+
+# Navigate into the project directory
+cd med_shakthi
+
+# Install dependencies
+flutter pub get
+
+# Run the app
+flutter run
+```
 
 ---
 
 ## 👤 Developer
 
-**Krish Lanjewar**  
-Flutter App Developer  
-Intern at UptoSkills  
+<div align="left">
+  Flutter App Developer Intern @ UptoSkills
+</div>
+<br />
+
+*   **Role**: Architecting the full mobile solution, integrating backend APIs, and optimizing app performance.
+*   **Focus**: Clean Architecture, Scalable UI, and User Experience.
 
 ---
 
-## 📄 Disclaimer
+## 📄 License & Disclaimer
 
-This project is developed strictly for **educational and internship purposes** as part of the UptoSkills internship program.
+This project is developed strictly for **educational and internship purposes** as part of the UptoSkills program. It is **not** intended for commercial distribution.
+
+<div align="center">
+  <sub>Built with ❤️ using Flutter</sub>
+</div>

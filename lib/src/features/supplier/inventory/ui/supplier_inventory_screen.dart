@@ -46,11 +46,13 @@ class _SupplierInventoryScreenState extends State<SupplierInventoryScreen> {
   Future<void> _deleteProduct(String productId) async {
     try {
       await _productRepo.deleteProduct(productId);
+      if (!mounted) return;
       setState(() {}); // Refresh list
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Product deleted successfully')),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Error deleting product: $e')));
@@ -118,7 +120,7 @@ class _SupplierInventoryScreenState extends State<SupplierInventoryScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

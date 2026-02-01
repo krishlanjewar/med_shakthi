@@ -35,7 +35,7 @@ class _AiAssistantPageState extends State<AiAssistantPage> {
         _messages.add(
           _ChatMessage(
             text:
-            " AI Response:\nI'm processing your request about \"$text\".\n(Backend AI integration coming soon 🚀)",
+                " AI Response:\nI'm processing your request about \"$text\".\n(Backend AI integration coming soon 🚀)",
             isUser: false,
           ),
         );
@@ -114,8 +114,9 @@ class _AiAssistantPageState extends State<AiAssistantPage> {
                         borderRadius: BorderRadius.circular(30),
                         borderSide: BorderSide.none,
                       ),
-                      contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 20),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                      ),
                     ),
                   ),
                 ),
@@ -151,11 +152,10 @@ class _ChatBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final alignment =
-    message.isUser ? Alignment.centerRight : Alignment.centerLeft;
-    final color = message.isUser
-        ? const Color(0xFF5A9CA0)
-        : Colors.white;
+    final alignment = message.isUser
+        ? Alignment.centerRight
+        : Alignment.centerLeft;
+    final color = message.isUser ? const Color(0xFF5A9CA0) : Colors.white;
     final textColor = message.isUser ? Colors.white : Colors.black87;
 
     return Align(
@@ -163,14 +163,15 @@ class _ChatBubble extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(14),
-        constraints:
-        BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.75,
+        ),
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),

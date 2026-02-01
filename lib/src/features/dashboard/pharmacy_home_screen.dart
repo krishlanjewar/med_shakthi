@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:med_shakthi/src/features/category/category_ui.dart';
 import 'package:med_shakthi/src/features/products/data/repositories/product_repository.dart';
-import 'package:med_shakthi/src/features/wishlist/data/wishlist_service.dart';
 import 'package:med_shakthi/src/features/wishlist/presentation/screens/wishlist_page.dart';
+import 'package:med_shakthi/src/features/wishlist/data/wishlist_service.dart';
 import 'package:med_shakthi/src/features/cart/presentation/screens/cart_page.dart';
 import 'package:med_shakthi/src/features/orders/orders_page.dart';
 import 'package:med_shakthi/src/features/products/presentation/screens/product_page.dart';
@@ -24,16 +24,19 @@ class PharmacyHomeScreen extends StatefulWidget {
   State<PharmacyHomeScreen> createState() => _PharmacyHomeScreenState();
 }
 
-class WishlistServiceSingleton {
-  static final WishlistService instance = WishlistService(userId: 'demo-user');
-}
-
 class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
   // State allows us to track dynamic changes, like the selected tab in the navigation bar.
   int _selectedIndex = 0;
   final ProductRepository _productRepo = ProductRepository();
 
-  final WishlistService wishlistService = WishlistServiceSingleton.instance;
+  @override
+  void initState() {
+    super.initState();
+    // Fetch user wishlist on init
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<WishlistService>().fetchWishlist();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +47,7 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
         children: [
           _buildHomeContent(),
           const CategoryPageNew(),
-          WishlistPage(wishlistService: wishlistService),
+          const WishlistPage(),
           const OrdersPage(),
           const AccountPage(),
         ],
@@ -96,9 +99,7 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (context) => const AccountPage(),
-              ),
+              MaterialPageRoute(builder: (context) => const AccountPage()),
             );
           },
           child: Container(
@@ -109,7 +110,7 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
               borderRadius: BorderRadius.circular(14),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
+                  color: Colors.grey.withValues(alpha: 0.1),
                   spreadRadius: 1,
                   blurRadius: 10,
                   offset: const Offset(0, 4),
@@ -134,7 +135,7 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(30),
-              border: Border.all(color: Colors.grey.withOpacity(0.1)),
+              border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
             ),
             child: const Row(
               children: [
@@ -173,7 +174,7 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
+                      color: Colors.grey.withValues(alpha: 0.1),
                       spreadRadius: 1,
                       blurRadius: 10,
                       offset: const Offset(0, 4),
@@ -220,9 +221,11 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
   }
 
   /// Reusable section title with "See All" button
-  Widget _buildSectionTitle(String title,
-      String actionText,
-      VoidCallback onAction,) {
+  Widget _buildSectionTitle(
+    String title,
+    String actionText,
+    VoidCallback onAction,
+  ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -276,7 +279,7 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.05),
+                color: Colors.grey.withValues(alpha: 0.05),
                 blurRadius: 10,
                 spreadRadius: 2,
               ),
@@ -300,11 +303,10 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
   /// Fetches Real Products from Supabase
   Widget _buildProductCard(Product product) {
     return GestureDetector(
-      onTap: () =>
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => ProductPage(product: product)),
-          ),
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => ProductPage(product: product)),
+      ),
       child: Container(
         width: 160,
         margin: const EdgeInsets.only(right: 16),
@@ -314,7 +316,7 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.08),
+              color: Colors.grey.withValues(alpha: 0.08),
               blurRadius: 15,
               offset: const Offset(0, 5),
             ),
@@ -328,12 +330,10 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
                 child: Image.network(
                   product.image,
                   fit: BoxFit.contain,
-                  errorBuilder: (c, e, s) =>
-                      Container(
-                        color: Colors.grey[100],
-                        child: const Center(
-                            child: Icon(Icons.image_not_supported)),
-                      ),
+                  errorBuilder: (c, e, s) => Container(
+                    color: Colors.grey[100],
+                    child: const Center(child: Icon(Icons.image_not_supported)),
+                  ),
                 ),
               ),
             ),
@@ -499,13 +499,12 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
 
               return GestureDetector(
                 //  Product details page open (same as before)
-                onTap: () =>
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ProductPage(product: product),
-                      ),
-                    ),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ProductPage(product: product),
+                  ),
+                ),
                 child: Container(
                   width: 160,
                   margin: const EdgeInsets.only(right: 16),
@@ -515,7 +514,7 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.08),
+                        color: Colors.grey.withValues(alpha: 0.08),
                         blurRadius: 15,
                         offset: const Offset(0, 5),
                       ),
@@ -530,13 +529,12 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
                           child: Image.network(
                             product.image,
                             fit: BoxFit.contain,
-                            errorBuilder: (c, e, s) =>
-                                Container(
-                                  color: Colors.grey[100],
-                                  child: const Center(
-                                    child: Icon(Icons.image_not_supported),
-                                  ),
-                                ),
+                            errorBuilder: (c, e, s) => Container(
+                              color: Colors.grey[100],
+                              child: const Center(
+                                child: Icon(Icons.image_not_supported),
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -683,7 +681,7 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 20,
             offset: const Offset(0, -5),
           ),
@@ -717,9 +715,7 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
           //  AI Page
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (_) => const AiAssistantPage(),
-            ),
+            MaterialPageRoute(builder: (_) => const AiAssistantPage()),
           );
         } else if (index == 3) {
           //  Orders Page
@@ -731,7 +727,9 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
           //  Chatbot Page
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const ChatDetailScreen(clientName: 'Abhishek',)),
+            MaterialPageRoute(
+              builder: (_) => const ChatDetailScreen(clientName: 'Abhishek'),
+            ),
           );
         } else {
           // Home / Category
@@ -754,8 +752,7 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
               style: TextStyle(
                 color: isSelected ? const Color(0xFF5A9CA0) : Colors.grey,
                 fontSize: 10,
-                fontWeight:
-                isSelected ? FontWeight.w600 : FontWeight.normal,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
             ),
           ],
@@ -765,7 +762,7 @@ class _PharmacyHomeScreenState extends State<PharmacyHomeScreen> {
   }
 }
 
-  /// A stateful widget that fetches the most recent order.
+/// A stateful widget that fetches the most recent order.
 /// If no order is found, it displays the PROMO BANNER (from screenshot).
 class RecentPurchaseCard extends StatefulWidget {
   const RecentPurchaseCard({super.key});
@@ -854,7 +851,7 @@ class _RecentPurchaseCardState extends State<RecentPurchaseCard> {
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF5A9CA0).withOpacity(0.4),
+            color: const Color(0xFF5A9CA0).withValues(alpha: 0.4),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -911,7 +908,7 @@ class _RecentPurchaseCardState extends State<RecentPurchaseCard> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:med_shakthi/src/features/orders/return_product_page.dart';
 // Ensure this import points to where you saved return_product_page.dart
 
-
 class OrderPlacedScreen extends StatefulWidget {
   const OrderPlacedScreen({super.key});
 
@@ -36,7 +35,9 @@ class _OrderPlacedScreenState extends State<OrderPlacedScreen>
     // Icon scale animation
     _iconScale = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
-          parent: _iconAnimationController, curve: Curves.elasticOut),
+        parent: _iconAnimationController,
+        curve: Curves.elasticOut,
+      ),
     );
 
     // Screen scale animation
@@ -77,7 +78,9 @@ class _OrderPlacedScreenState extends State<OrderPlacedScreen>
                         child: Container(
                           padding: const EdgeInsets.all(24),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF4C8077).withOpacity(0.1),
+                            color: const Color(
+                              0xFF4C8077,
+                            ).withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
@@ -149,11 +152,18 @@ class _OrderPlacedScreenState extends State<OrderPlacedScreen>
                             const SizedBox(height: 8),
                             _buildPriceRow("Tax (5%)", "\$2.72"),
                             const SizedBox(height: 8),
-                            _buildPriceRow("Shipping", "Free",
-                                isDiscount: true),
+                            _buildPriceRow(
+                              "Shipping",
+                              "Free",
+                              isDiscount: true,
+                            ),
                             const Divider(height: 30),
-                            _buildPriceRow("Total Paid", "\$57.22",
-                                isBold: true, fontSize: 18),
+                            _buildPriceRow(
+                              "Total Paid",
+                              "\$57.22",
+                              isBold: true,
+                              fontSize: 18,
+                            ),
                           ],
                         ),
                       ),
@@ -217,7 +227,11 @@ class _OrderPlacedScreenState extends State<OrderPlacedScreen>
   }
 
   Widget _buildOrderItem(
-      String title, String details, String priceString, String imageUrl) {
+    String title,
+    String details,
+    String priceString,
+    String imageUrl,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -258,10 +272,7 @@ class _OrderPlacedScreenState extends State<OrderPlacedScreen>
                     const SizedBox(height: 4),
                     Text(
                       details,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                     ),
                   ],
                 ),
@@ -287,8 +298,10 @@ class _OrderPlacedScreenState extends State<OrderPlacedScreen>
             child: InkWell(
               onTap: () {
                 // Parse price string to double for the return page
-                double priceValue = double.tryParse(
-                    priceString.replaceAll(RegExp(r'[^0-9.]'), '')) ??
+                double priceValue =
+                    double.tryParse(
+                      priceString.replaceAll(RegExp(r'[^0-9.]'), ''),
+                    ) ??
                     0.0;
 
                 Navigator.push(
@@ -296,7 +309,7 @@ class _OrderPlacedScreenState extends State<OrderPlacedScreen>
                   MaterialPageRoute(
                     builder: (context) => ReturnProductPage(
                       orderId: "ORD-2026-001", // Or mock ID
-                      productId: "PROD-XYZ",   // Or mock ID
+                      productId: "PROD-XYZ", // Or mock ID
                       productName: title,
                       productImage: imageUrl,
                       price: priceValue,
@@ -305,7 +318,10 @@ class _OrderPlacedScreenState extends State<OrderPlacedScreen>
                 );
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.red.shade50,
                   borderRadius: BorderRadius.circular(20),
@@ -314,7 +330,11 @@ class _OrderPlacedScreenState extends State<OrderPlacedScreen>
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.assignment_return_outlined, size: 14, color: Colors.red.shade700),
+                    Icon(
+                      Icons.assignment_return_outlined,
+                      size: 14,
+                      color: Colors.red.shade700,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       "Return Item",
@@ -335,12 +355,12 @@ class _OrderPlacedScreenState extends State<OrderPlacedScreen>
   }
 
   Widget _buildPriceRow(
-      String label,
-      String value, {
-        bool isDiscount = false,
-        bool isBold = false,
-        double fontSize = 14,
-      }) {
+    String label,
+    String value, {
+    bool isDiscount = false,
+    bool isBold = false,
+    double fontSize = 14,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -357,7 +377,9 @@ class _OrderPlacedScreenState extends State<OrderPlacedScreen>
           style: TextStyle(
             fontSize: fontSize,
             fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
-            color: isDiscount ? Colors.green : (isBold ? Colors.black : Colors.black87),
+            color: isDiscount
+                ? Colors.green
+                : (isBold ? Colors.black : Colors.black87),
           ),
         ),
       ],
