@@ -127,7 +127,7 @@ class _AuthGateState extends State<AuthGate> {
 
     // 3. Logged In -> Check Role
     if (_isSupplier) {
-      return const SupplierDashboard();
+fl      return const SupplierDashboard();
     } else {
       return const PharmacyHomeScreen();
     }
@@ -142,18 +142,19 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 // Providers
 import 'package:med_shakthi/src/features/cart/data/cart_data.dart';
-import 'package:med_shakthi/src/features/checkout/presentation/screens/AddressStore.dart';
+import 'package:med_shakthi/src/features/checkout/presentation/screens/address_store.dart';
 import 'package:med_shakthi/src/features/wishlist/data/wishlist_service.dart';
 
 // Auth & Dashboards
+import 'package:med_shakthi/src/features/auth/domain/repositories/auth_repository.dart';
+import 'package:med_shakthi/src/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:med_shakthi/src/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:med_shakthi/src/features/auth/presentation/screens/login_page.dart';
 import 'package:med_shakthi/src/features/dashboard/pharmacy_home_screen.dart';
 import 'package:med_shakthi/src/features/dashboard/supplier_dashboard.dart';
 
 // 🔐 Reset Password Page
 import 'package:med_shakthi/src/features/auth/presentation/screens/reset_password_page.dart';
-
-
 
 /// 🔑 GLOBAL NAVIGATOR KEY (IMPORTANT)
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -171,6 +172,12 @@ Future<void> main() async {
   runApp(
     MultiProvider(
       providers: [
+        Provider<IAuthRepository>(
+          create: (_) => AuthRepositoryImpl(Supabase.instance.client),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => AuthController(context.read<IAuthRepository>()),
+        ),
         ChangeNotifierProvider(create: (_) => CartData()),
         ChangeNotifierProvider(create: (_) => AddressStore()),
         ChangeNotifierProvider(create: (_) => WishlistService()),
@@ -179,6 +186,7 @@ Future<void> main() async {
     ),
   );
 }
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -196,7 +204,9 @@ class MyApp extends StatelessWidget {
       home: const RootRouter(), // ✅ CORRECT
     );
   }
-}class RootRouter extends StatefulWidget {
+}
+
+class RootRouter extends StatefulWidget {
   const RootRouter({super.key});
 
   @override
@@ -226,7 +236,7 @@ class _RootRouterState extends State<RootRouter> {
 
         navigatorKey.currentState?.pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const ResetPasswordPage()),
-              (_) => false,
+          (_) => false,
         );
         return;
       }
@@ -253,8 +263,6 @@ class _RootRouterState extends State<RootRouter> {
     return const AuthGate();
   }
 }
-
-
 
 /// 🔐 AUTH GATE (ROLE BASED NAVIGATION)
 class AuthGate extends StatefulWidget {
