@@ -28,27 +28,11 @@ class AuthRepositoryImpl implements IAuthRepository {
 
   @override
   Future<AuthResponse> signInWithGoogle() async {
-    // Explicitly sign out from the plugin to force the account picker
-    await _googleSignIn.signOut();
-    
-    final googleUser = await _googleSignIn.signIn();
-    if (googleUser == null) {
-      throw const AuthException('Google Sign-In was cancelled');
-    }
-
-    final googleAuth = await googleUser.authentication;
-    final accessToken = googleAuth.accessToken;
-    final idToken = googleAuth.idToken;
-
-    if (idToken == null) {
-      throw const AuthException('No ID Token found.');
-    }
-
-    return await _supabase.auth.signInWithIdToken(
-      provider: OAuthProvider.google,
-      idToken: idToken,
-      accessToken: accessToken,
+    await _supabase.auth.signInWithOAuth(
+      OAuthProvider.google,
+      queryParams: {'prompt': 'select_account'},
     );
+    return AuthResponse();
   }
 
   @override
