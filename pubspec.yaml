@@ -51,6 +51,7 @@ dependencies:
   csv: ^6.0.0
   pdf: ^3.11.3
   printing: ^5.14.2
+  google_sign_in: 6.2.1
 
 
 dev_dependencies:

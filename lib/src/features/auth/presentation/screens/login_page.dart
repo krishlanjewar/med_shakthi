@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:med_shakthi/src/features/dashboard/pharmacy_home_screen.dart';
 import 'package:med_shakthi/src/features/auth/presentation/screens/supplier_signup_page.dart';
 import 'package:med_shakthi/src/features/auth/presentation/screens/signup_page.dart';
 import 'package:med_shakthi/src/features/dashboard/supplier_dashboard.dart';
 import 'package:med_shakthi/src/core/widgets/app_logo.dart';
-
+import '../controllers/auth_controller.dart';
 import 'forgot_password_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -18,14 +19,10 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
 
-  // Supabase Client
-  final SupabaseClient supabase = Supabase.instance.client;
-
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   bool _obscurePassword = true;
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -34,73 +31,77 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  Future<void> _handleNavigation() async {
+    final authController = context.read<AuthController>();
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+
+    final supplierData = await authController.checkSupplierStatus(user.id);
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Login successful'),
+        backgroundColor: Colors.green,
+      ),
+    );
+
+    if (supplierData != null) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const SupplierDashboard()),
+        (route) => false,
+      );
+    } else {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const PharmacyHomeScreen()),
+        (route) => false,
+      );
+    }
+  }
+
   Future<void> _onLoginPressed() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      _isLoading = true;
-    });
+    final authController = context.read<AuthController>();
+    final success = await authController.loginWithEmail(
+      _emailController.text.trim(),
+      _passwordController.text.trim(),
+    );
 
-    try {
-      // 🔐 Supabase Login Logic
-      final AuthResponse res = await supabase.auth.signInWithPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
-
-      if (res.user != null) {
-        // 🔍 Check if the logged-in user is a supplier
-        final supplierData = await supabase
-            .from('suppliers')
-            .select()
-            .eq('user_id', res.user!.id)
-            .maybeSingle();
-
-        if (!mounted) return;
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Login successful'),
-            backgroundColor: Colors.green,
-          ),
-        );
-
-        // 🔀 Navigation Logic
-        if (supplierData != null) {
-          // Navigate to Supplier Dashboard
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-              builder: (BuildContext context) => const SupplierDashboard(),
-            ),
-            (route) => false,
-          );
-        } else {
-          // Navigate to User/Pharmacy Home
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-              builder: (BuildContext context) => const PharmacyHomeScreen(),
-            ),
-            (route) => false,
-          );
-        }
-      }
-    } on AuthException catch (e) {
-      if (!mounted) return;
+    if (success && mounted) {
+      _handleNavigation();
+    } else if (authController.errorMessage != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message), backgroundColor: Colors.redAccent),
+        SnackBar(
+          content: Text(authController.errorMessage!),
+          backgroundColor: Colors.redAccent,
+        ),
       );
-    } catch (e) {
-      if (!mounted) return;
+    }
+  }
+
+  Future<void> _onGoogleLoginPressed() async {
+    final authController = context.read<AuthController>();
+    final success = await authController.loginWithGoogle();
+
+    if (success && mounted) {
+      _handleNavigation();
+    } else if (authController.errorMessage != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.redAccent),
+        SnackBar(
+          content: Text(authController.errorMessage!),
+          backgroundColor: Colors.redAccent,
+        ),
       );
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final authController = context.watch<AuthController>();
+    final isLoading = authController.isLoading;
+
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -184,7 +185,7 @@ class _LoginPageState extends State<LoginPage> {
                         style: TextStyle(
                           color: Theme.of(
                             context,
-                          ).textTheme.bodySmall?.color?.withValues(alpha: 0.6),
+                          ).textTheme.bodySmall?.color?.withOpacity(0.6),
                         ),
                       ),
                     ),
@@ -194,7 +195,7 @@ class _LoginPageState extends State<LoginPage> {
                     width: double.infinity,
                     height: 52,
                     child: ElevatedButton(
-                      onPressed: _isLoading ? null : _onLoginPressed,
+                      onPressed: isLoading ? null : _onLoginPressed,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF6AA39B),
                         foregroundColor: Colors.white,
@@ -202,7 +203,7 @@ class _LoginPageState extends State<LoginPage> {
                           borderRadius: BorderRadius.circular(30),
                         ),
                       ),
-                      child: _isLoading
+                      child: isLoading
                           ? const SizedBox(
                               width: 24,
                               height: 24,
@@ -227,7 +228,7 @@ class _LoginPageState extends State<LoginPage> {
                       style: TextStyle(
                         color: Theme.of(
                           context,
-                        ).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
+                        ).textTheme.bodySmall?.color?.withOpacity(0.7),
                       ),
                     ),
                   ),
@@ -235,12 +236,19 @@ class _LoginPageState extends State<LoginPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _socialIcon(Icons.facebook, const Color(0xFF1877F2)),
+                      _socialIcon(
+                        Icons.facebook,
+                        const Color(0xFF1877F2),
+                        onPressed: () {
+                          // TODO: Implement Facebook Login
+                        },
+                      ),
                       const SizedBox(width: 20),
                       _socialIcon(
                         Icons.g_mobiledata,
                         const Color(0xFFEA4335),
                         size: 40,
+                        onPressed: isLoading ? null : _onGoogleLoginPressed,
                       ),
                       const SizedBox(width: 20),
                       _socialIcon(
@@ -248,6 +256,9 @@ class _LoginPageState extends State<LoginPage> {
                         Theme.of(context).brightness == Brightness.dark
                             ? Colors.white
                             : Colors.black,
+                        onPressed: () {
+                          // TODO: Implement Apple Login
+                        },
                       ),
                     ],
                   ),
@@ -266,7 +277,7 @@ class _LoginPageState extends State<LoginPage> {
                         text: TextSpan(
                           style: TextStyle(
                             color: Theme.of(context).textTheme.bodySmall?.color
-                                ?.withValues(alpha: 0.6),
+                                ?.withOpacity(0.6),
                             fontSize: 14,
                           ),
                           children: [
@@ -277,7 +288,7 @@ class _LoginPageState extends State<LoginPage> {
                                     .textTheme
                                     .bodySmall
                                     ?.color
-                                    ?.withValues(alpha: 0.7),
+                                    ?.withOpacity(0.7),
                               ),
                             ),
                             TextSpan(
@@ -308,7 +319,7 @@ class _LoginPageState extends State<LoginPage> {
                         text: TextSpan(
                           style: TextStyle(
                             color: Theme.of(context).textTheme.bodySmall?.color
-                                ?.withValues(alpha: 0.6),
+                                ?.withOpacity(0.6),
                             fontSize: 14,
                           ),
                           children: [
@@ -319,7 +330,7 @@ class _LoginPageState extends State<LoginPage> {
                                     .textTheme
                                     .bodySmall
                                     ?.color
-                                    ?.withValues(alpha: 0.7),
+                                    ?.withOpacity(0.7),
                               ),
                             ),
                             TextSpan(
@@ -376,7 +387,7 @@ class _LoginPageState extends State<LoginPage> {
         hintStyle: TextStyle(
           color: Theme.of(
             context,
-          ).textTheme.bodySmall?.color?.withValues(alpha: 0.4),
+          ).textTheme.bodySmall?.color?.withOpacity(0.4),
         ),
         suffixIcon: suffixIcon,
         filled: true,
@@ -389,25 +400,28 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _socialIcon(IconData icon, Color color, {double size = 30}) {
-    return Container(
-      width: 50,
-      height: 50,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Theme.of(context).cardColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(
-              alpha: Theme.of(context).brightness == Brightness.dark
-                  ? 0.3
-                  : 0.1,
+  Widget _socialIcon(IconData icon, Color color, {double size = 30, VoidCallback? onPressed}) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Theme.of(context).cardColor,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(
+                Theme.of(context).brightness == Brightness.dark
+                    ? 0.3
+                    : 0.1,
+              ),
+              blurRadius: 8,
             ),
-            blurRadius: 8,
-          ),
-        ],
+          ],
+        ),
+        child: Icon(icon, color: color, size: size),
       ),
-      child: Icon(icon, color: color, size: size),
     );
   }
 }

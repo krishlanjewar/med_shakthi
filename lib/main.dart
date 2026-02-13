@@ -148,6 +148,9 @@ import 'package:med_shakthi/src/core/theme/theme_provider.dart';
 import 'package:med_shakthi/src/core/theme/app_theme.dart';
 
 // Auth & Dashboards
+import 'package:med_shakthi/src/features/auth/domain/repositories/auth_repository.dart';
+import 'package:med_shakthi/src/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:med_shakthi/src/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:med_shakthi/src/features/auth/presentation/screens/login_page.dart';
 import 'package:med_shakthi/src/features/dashboard/pharmacy_home_screen.dart';
 import 'package:med_shakthi/src/features/dashboard/supplier_dashboard.dart';
@@ -171,6 +174,12 @@ Future<void> main() async {
   runApp(
     MultiProvider(
       providers: [
+        Provider<IAuthRepository>(
+          create: (_) => AuthRepositoryImpl(Supabase.instance.client),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => AuthController(context.read<IAuthRepository>()),
+        ),
         ChangeNotifierProvider(create: (_) => CartData()),
         ChangeNotifierProvider(create: (_) => AddressStore()),
         ChangeNotifierProvider(create: (_) => WishlistService()),
