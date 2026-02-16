@@ -307,7 +307,7 @@ class _SupplierProfileScreenState extends State<SupplierProfileScreen> {
                   }),
                   _buildMenuOption(Icons.notifications, "Notifications", () {}),
                   _buildMenuOption(Icons.help, "Help & Support", () {}),
-                  _buildMenuOption(Icons.logout, "Logout", _handleLogout),
+                  _buildMenuOption(Icons.logout, "Logout", _handleLogout, isDestructive: true),
                 ],
               ),
             ),
@@ -550,37 +550,40 @@ class _SupplierProfileScreenState extends State<SupplierProfileScreen> {
     );
   }
 
-  Widget _buildMenuOption(IconData icon, String title, VoidCallback onTap) {
+  Widget _buildMenuOption(IconData icon, String title, VoidCallback onTap, {bool isDestructive = false}) {
+    final color = isDestructive ? Colors.redAccent : const Color(0xFF4C8077);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+          color: isDestructive 
+              ? Colors.redAccent.withOpacity(0.2)
+              : Theme.of(context).dividerColor.withOpacity(0.1),
         ),
       ),
       child: ListTile(
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: const Color(0xFF4C8077).withValues(alpha: 0.1),
+            color: color.withOpacity(0.1),
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, color: const Color(0xFF4C8077), size: 20),
+          child: Icon(icon, color: color, size: 20),
         ),
         title: Text(
           title,
           style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 15,
-            color: Theme.of(context).textTheme.bodyLarge?.color,
+            color: isDestructive ? Colors.redAccent : Theme.of(context).textTheme.bodyLarge?.color,
           ),
         ),
-        trailing: const Icon(
+        trailing: Icon(
           Icons.arrow_forward_ios,
           size: 16,
-          color: Colors.grey,
+          color: isDestructive ? Colors.redAccent.withOpacity(0.5) : Colors.grey,
         ),
         onTap: onTap,
       ),
@@ -588,12 +591,56 @@ class _SupplierProfileScreenState extends State<SupplierProfileScreen> {
   }
 
   Future<void> _handleLogout() async {
-    await supabase.auth.signOut();
-    if (mounted) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const LoginPage()),
-        (route) => false,
-      );
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).cardColor,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.logout, color: Colors.redAccent),
+            SizedBox(width: 12),
+            Text(
+              "Logout",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        content: const Text("Are you sure you want to log out?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              "Cancel",
+              style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.w600),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              elevation: 0,
+            ),
+            child: const Text(
+              "Logout",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await supabase.auth.signOut();
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const LoginPage()),
+          (route) => false,
+        );
+      }
     }
   }
 }

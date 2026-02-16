@@ -81,27 +81,71 @@ class _AccountPageState extends State<AccountPage> {
   }
 
   Future<void> _handleLogout() async {
-    setState(() => _isLoading = true);
-    try {
-      // Clear local persistence before signing out
-      context.read<CartData>().clearLocalStateOnly();
-      context.read<WishlistService>().clearWishlist();
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).cardColor,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.logout, color: Colors.redAccent),
+            SizedBox(width: 12),
+            Text(
+              "Logout",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        content: const Text("Are you sure you want to log out?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              "Cancel",
+              style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.w600),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              elevation: 0,
+            ),
+            child: const Text(
+              "Logout",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
 
-      await supabase.auth.signOut();
-      if (!mounted) return;
+    if (confirmed == true) {
+      setState(() => _isLoading = true);
+      try {
+        // Clear local persistence before signing out
+        context.read<CartData>().clearLocalStateOnly();
+        context.read<WishlistService>().clearWishlist();
 
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const LoginPage()),
-        (route) => false,
-      );
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Logout failed: $e")));
+        await supabase.auth.signOut();
+        if (!mounted) return;
+
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const LoginPage()),
+          (route) => false,
+        );
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text("Logout failed: $e")));
+        }
+      } finally {
+        if (mounted) setState(() => _isLoading = false);
       }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -408,13 +452,23 @@ class _AccountPageState extends State<AccountPage> {
 
                         const SizedBox(height: 16),
 
-                        FilledButton(
+                        OutlinedButton(
                           onPressed: _handleLogout,
-                          style: FilledButton.styleFrom(
-                            backgroundColor: const Color(0xFF6AA39B),
-                            minimumSize: const Size.fromHeight(48),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.redAccent,
+                            side: const BorderSide(color: Colors.redAccent, width: 1.5),
+                            minimumSize: const Size.fromHeight(54),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
                           ),
-                          child: const Text("Logout"),
+                          child: const Text(
+                            "Logout",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
                         ),
 
                         const SizedBox(height: 24),

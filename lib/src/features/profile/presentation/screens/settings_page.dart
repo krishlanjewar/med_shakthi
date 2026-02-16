@@ -6,6 +6,7 @@ import 'package:med_shakthi/src/core/theme/theme_provider.dart';
 import 'package:med_shakthi/src/features/cart/data/cart_data.dart';
 import 'package:med_shakthi/src/features/wishlist/data/wishlist_service.dart';
 import 'privacy_policy_screen.dart';
+import 'package:med_shakthi/src/features/auth/presentation/screens/login_page.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -82,15 +83,8 @@ class _SettingsPageState extends State<SettingsPage> {
             title: "Logout",
             subtitle: "Sign out from your account",
             icon: Icons.logout,
-            onTap: () async {
-              // Clear local state
-              context.read<CartData>().clearLocalStateOnly();
-              context.read<WishlistService>().clearWishlist();
-
-              await supabase.auth.signOut();
-              if (!mounted) return;
-              Navigator.pop(context);
-            },
+            isDestructive: true,
+            onTap: _handleLogout,
           ),
         ],
       ),
@@ -154,6 +148,65 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  Future<void> _handleLogout() async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).cardColor,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.logout, color: Colors.redAccent),
+            SizedBox(width: 12),
+            Text(
+              "Logout",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        content: const Text("Are you sure you want to log out?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              "Cancel",
+              style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.w600),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              elevation: 0,
+            ),
+            child: const Text(
+              "Logout",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      if (!mounted) return;
+      // Clear local state
+      context.read<CartData>().clearLocalStateOnly();
+      context.read<WishlistService>().clearWishlist();
+
+      await supabase.auth.signOut();
+      if (!mounted) return;
+
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LoginPage()),
+        (route) => false,
+      );
+    }
+  }
+
   Widget _tileSwitch({
     required String title,
     required String subtitle,
@@ -194,7 +247,9 @@ class _SettingsPageState extends State<SettingsPage> {
     required String subtitle,
     required IconData icon,
     required VoidCallback onTap,
+    bool isDestructive = false,
   }) {
+    final color = isDestructive ? Colors.redAccent : const Color(0xFF6AA39B);
     return InkWell(
       borderRadius: BorderRadius.circular(14),
       onTap: onTap,
@@ -203,10 +258,13 @@ class _SettingsPageState extends State<SettingsPage> {
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(14),
+          border: isDestructive 
+            ? Border.all(color: Colors.redAccent.withOpacity(0.1))
+            : null,
         ),
         child: Row(
           children: [
-            Icon(icon, color: const Color(0xFF6AA39B)),
+            Icon(icon, color: color),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -216,16 +274,18 @@ class _SettingsPageState extends State<SettingsPage> {
                     title,
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
-                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                      color: isDestructive ? Colors.redAccent : Theme.of(context).textTheme.bodyLarge?.color,
                     ),
                   ),
                   const SizedBox(height: 3),
                   Text(
                     subtitle,
                     style: TextStyle(
-                      color: Theme.of(
-                        context,
-                      ).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+                      color: isDestructive 
+                        ? Colors.redAccent.withOpacity(0.7)
+                        : Theme.of(
+                          context,
+                        ).textTheme.bodyMedium?.color?.withOpacity(0.7),
                     ),
                   ),
                 ],
@@ -234,9 +294,11 @@ class _SettingsPageState extends State<SettingsPage> {
             Icon(
               Icons.arrow_forward_ios,
               size: 14,
-              color: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
+              color: isDestructive 
+                ? Colors.redAccent.withOpacity(0.5)
+                : Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.color?.withOpacity(0.5),
             ),
           ],
         ),
