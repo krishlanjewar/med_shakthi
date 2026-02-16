@@ -6,6 +6,7 @@ import '../../../cart/data/cart_item.dart';
 import '../../../products/presentation/screens/product_page.dart';
 import '../../../products/data/models/product_model.dart';
 import 'package:med_shakthi/src/core/utils/smart_product_image.dart';
+import '../../../auth/presentation/auth_gate.dart';
 
 class WishlistPage extends StatelessWidget {
   const WishlistPage({super.key});
@@ -36,16 +37,38 @@ class WishlistPage extends StatelessWidget {
                     fontSize: 20,
                   ),
                 ),
-                leading: Navigator.canPop(context)
-                    ? IconButton(
-                        icon: Icon(
-                          Icons.arrow_back_ios_new,
-                          size: 20,
-                          color: Theme.of(context).iconTheme.color,
+                leading: Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Center(
+                    child: IconButton(
+                      icon: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).cardColor,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.1),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
-                        onPressed: () => Navigator.pop(context),
-                      )
-                    : null,
+                        child: const Icon(
+                          Icons.arrow_back_ios_new,
+                          size: 16,
+                          color: Color(0xFF4C8077), // Brand color
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (context) => const AuthGate()),
+                          (route) => false,
+                        );
+                      },
+                    ),
+                  ),
+                ),
               ),
 
               // Empty State or List
