@@ -432,19 +432,42 @@ class _AccountPageState extends State<AccountPage> {
                         Row(
                           children: [
                             Expanded(
-                              child: OutlinedButton(
+                              child: TextButton.icon(
                                 onPressed: () {},
-                                child: const Text("Change Password"),
+                                icon: const Icon(Icons.lock_outline, size: 18),
+                                label: const Text("Reset Password"),
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14,
+                                  ),
+                                  foregroundColor: const Color(0xFF6AA39B),
+                                  backgroundColor: const Color(
+                                    0xFF6AA39B,
+                                  ).withValues(alpha: 0.08),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
                               ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
-                              child: OutlinedButton(
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: Colors.red.shade600,
-                                ),
+                              child: TextButton.icon(
                                 onPressed: _handleDeleteAccount,
-                                child: const Text("Delete Account"),
+                                icon: const Icon(Icons.delete_outline, size: 18),
+                                label: const Text("Delete"),
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14,
+                                  ),
+                                  foregroundColor: Colors.redAccent,
+                                  backgroundColor: Colors.redAccent.withValues(
+                                    alpha: 0.08,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
                               ),
                             ),
                           ],
@@ -452,21 +475,23 @@ class _AccountPageState extends State<AccountPage> {
 
                         const SizedBox(height: 16),
 
-                        OutlinedButton(
+                        ElevatedButton.icon(
                           onPressed: _handleLogout,
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.redAccent,
-                            side: const BorderSide(color: Colors.redAccent, width: 1.5),
-                            minimumSize: const Size.fromHeight(54),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                          child: const Text(
+                          icon: const Icon(Icons.logout_rounded, size: 20),
+                          label: const Text(
                             "Logout",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.redAccent,
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size.fromHeight(56),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                         ),

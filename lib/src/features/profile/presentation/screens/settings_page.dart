@@ -256,11 +256,13 @@ class _SettingsPageState extends State<SettingsPage> {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
+          color: isDestructive
+              ? Colors.redAccent.withValues(alpha: 0.05)
+              : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(14),
-          border: isDestructive 
-            ? Border.all(color: Colors.redAccent.withOpacity(0.1))
-            : null,
+          border: isDestructive
+              ? Border.all(color: Colors.redAccent.withValues(alpha: 0.1))
+              : null,
         ),
         child: Row(
           children: [
