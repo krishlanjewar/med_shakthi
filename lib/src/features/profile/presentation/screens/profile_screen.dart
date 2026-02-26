@@ -184,9 +184,9 @@ class _AccountPageState extends State<AccountPage> {
 
   Future<void> _showEditProfileSheet() async {
     final nameCtrl = TextEditingController(text: _displayName);
-    // Store the full international phone number (with dial code)
-    String _completePhone = _phone;
-    bool _phoneValid = _phone.isNotEmpty;
+    // Holds the full international number written back by IntlPhoneField
+    String completePhone = _phone;
+    bool phoneValid = _phone.isNotEmpty;
 
     await showModalBottomSheet(
       context: context,
@@ -194,11 +194,23 @@ class _AccountPageState extends State<AccountPage> {
       backgroundColor: Colors.transparent,
       builder: (ctx) => _EditProfileSheet(
         nameCtrl: nameCtrl,
-        phoneCtrl: phoneCtrl,
+        initialPhone: _phone,
+        onPhoneChanged: (full, valid) {
+          completePhone = full;
+          phoneValid = valid;
+        },
         onSave: () async {
+          if (!phoneValid && completePhone.isNotEmpty) {
+            ScaffoldMessenger.of(ctx).showSnackBar(
+              const SnackBar(
+                content: Text('Please enter a valid phone number.'),
+                backgroundColor: Colors.redAccent,
+              ),
+            );
+            return;
+          }
           final user = supabase.auth.currentUser;
           if (user == null) return;
-          // Capture both before the async gap
           final messenger = ScaffoldMessenger.of(ctx);
           final nav = Navigator.of(ctx);
           try {
@@ -206,13 +218,13 @@ class _AccountPageState extends State<AccountPage> {
                 .from('users')
                 .update({
                   'name': nameCtrl.text.trim(),
-                  'phone': phoneCtrl.text.trim(),
+                  'phone': completePhone,
                 })
                 .eq('id', user.id);
             if (mounted) {
               setState(() {
                 _displayName = nameCtrl.text.trim();
-                _phone = phoneCtrl.text.trim();
+                _phone = completePhone;
               });
               nav.pop();
               messenger.showSnackBar(
@@ -623,20 +635,43 @@ class _AccountPageState extends State<AccountPage> {
 
 /* ─────────────── Edit Profile Bottom Sheet ─────────────── */
 
-class _EditProfileSheet extends StatelessWidget {
+class _EditProfileSheet extends StatefulWidget {
   final TextEditingController nameCtrl;
-  final TextEditingController phoneCtrl;
+  final String initialPhone;
+  final void Function(String completeNumber, bool isValid) onPhoneChanged;
   final Future<void> Function() onSave;
 
   const _EditProfileSheet({
     required this.nameCtrl,
-    required this.phoneCtrl,
+    required this.initialPhone,
+    required this.onPhoneChanged,
     required this.onSave,
   });
 
   @override
+  State<_EditProfileSheet> createState() => _EditProfileSheetState();
+}
+
+class _EditProfileSheetState extends State<_EditProfileSheet> {
+  bool _isSaving = false;
+
+  // Extract just the national number from a full international string like +919876543210
+  String _extractNationalNumber(String fullPhone) {
+    if (fullPhone.isEmpty) return '';
+    // Strip the leading +XX or +XXX dial code heuristically — IntlPhoneField
+    // will handle the rest; we just seed the number part.
+    final digits = fullPhone.replaceAll(RegExp(r'\D'), '');
+    // Return last 10 digits as a safe fallback
+    if (digits.length > 10) return digits.substring(digits.length - 10);
+    return digits;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final primary = const Color(0xFF6AA39B);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = Theme.of(context).cardColor;
+
     return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -651,6 +686,7 @@ class _EditProfileSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Handle bar
             Center(
               child: Container(
                 width: 40,
@@ -667,71 +703,121 @@ class _EditProfileSheet extends StatelessWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
-            _inputField(
-              context,
-              controller: nameCtrl,
-              label: 'Full Name',
-              icon: Icons.person_outline,
+
+            // ── Name field ──────────────────────────
+            TextField(
+              controller: widget.nameCtrl,
+              textCapitalization: TextCapitalization.words,
+              decoration: InputDecoration(
+                labelText: 'Full Name',
+                prefixIcon: const Icon(Icons.person_outline, size: 20),
+                filled: true,
+                fillColor: cardColor,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(color: primary, width: 1.5),
+                ),
+              ),
             ),
             const SizedBox(height: 14),
-            _inputField(
-              context,
-              controller: phoneCtrl,
-              label: 'Phone Number',
-              icon: Icons.phone_outlined,
+
+            // ── Phone field with country picker ─────
+            IntlPhoneField(
+              initialValue: _extractNationalNumber(widget.initialPhone),
+              initialCountryCode: 'IN',
               keyboardType: TextInputType.phone,
+              showDropdownIcon: true,
+              dropdownIconPosition: IconPosition.trailing,
+              dropdownIcon: Icon(
+                Icons.arrow_drop_down_rounded,
+                color: primary,
+                size: 20,
+              ),
+              flagsButtonPadding: const EdgeInsets.only(left: 12, right: 4),
+              decoration: InputDecoration(
+                labelText: 'Phone Number',
+                filled: true,
+                fillColor: cardColor,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(color: primary, width: 1.5),
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
+                ),
+              ),
+              style: TextStyle(
+                color: isDark ? Colors.white : Colors.black87,
+                fontSize: 15,
+              ),
+              onChanged: (phone) {
+                widget.onPhoneChanged(
+                  phone.completeNumber,
+                  phone.isValidNumber(),
+                );
+              },
+              onCountryChanged: (country) {
+                // country changed — number validity re-evaluated on next onChanged
+              },
             ),
             const SizedBox(height: 24),
+
+            // ── Save button ─────────────────────────
             SizedBox(
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: onSave,
+                onPressed: _isSaving
+                    ? null
+                    : () async {
+                        setState(() => _isSaving = true);
+                        await widget.onSave();
+                        if (mounted) setState(() => _isSaving = false);
+                      },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primary,
                   foregroundColor: Colors.white,
+                  disabledBackgroundColor: primary.withValues(alpha: 0.5),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
                 ),
-                child: const Text(
-                  'Save Changes',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
+                child: _isSaving
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text(
+                        'Save Changes',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _inputField(
-    BuildContext context, {
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    TextInputType keyboardType = TextInputType.text,
-  }) {
-    return TextField(
-      controller: controller,
-      keyboardType: keyboardType,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon, size: 20),
-        filled: true,
-        fillColor: Theme.of(context).cardColor,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFF6AA39B), width: 1.5),
         ),
       ),
     );
